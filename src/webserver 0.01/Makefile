@@ -1,4 +1,4 @@
-VPATH=../base/threadpool/src:../base/threadpool/src/Utils/ThreadPool:./src
+VPATH=../base/ThreadPool/src:../base/ThreadPool/src/Utils/ThreadPool:./src
  
 object=UThreadPool.o http_conn.o main.o
 
