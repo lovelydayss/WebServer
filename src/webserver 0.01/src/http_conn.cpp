@@ -1,9 +1,4 @@
 #include "http_conn.h"
-#include <asm-generic/errno-base.h>
-#include <cstdarg>
-#include <cstdio>
-#include <cstring>
-#include <sys/epoll.h>
 
 // HTTP 响应的状态信息
 const char* ok_200_title = "OK";
@@ -21,7 +16,7 @@ const char* error_500_form =
     "There was an unusual problem serving the requested file.\n";
 
 // 网站的根目录
-const char* doc_root = "/home/lovelydayss/Code/webserver/src/textlate/html";
+const char* doc_root = "/home/lovelydayss/Code/webserver/src/template/html";
 
 // epoll
 int setnonblocking(int fd) {
@@ -173,7 +168,7 @@ bool http_conn::read() {
 // 解析 HTTP 请求行
 http_conn::HTTP_CODE http_conn::parse_request_line(char* text) {
 
-	m_url = strpbrk(text, "\t");
+	m_url = strpbrk(text, " \t");
 
 	// 如果请求行中没有空白字符或 "\t" 字符，则 HTTP请求存在问题
 	if (!m_url)
@@ -188,14 +183,14 @@ http_conn::HTTP_CODE http_conn::parse_request_line(char* text) {
 	else
 		return BAD_REQUEST;
 
-	m_url += strspn(m_url, "\t");
-	m_version = strpbrk(m_url, "\t");
+	m_url += strspn(m_url, " \t");
+	m_version = strpbrk(m_url, " \t");
 
 	if (!m_version)
 		return BAD_REQUEST;
 
 	*m_version++ = '\0';
-	m_version += strspn(m_version, "\t");
+	m_version += strspn(m_version, " \t");
 
 	// 仅支持 HTTP1.1
 	if (strcasecmp(m_version, "HTTP/1.1") != 0)
@@ -281,7 +276,7 @@ http_conn::HTTP_CODE http_conn::process_read() {
 
 	while (
 	    ((m_check_state == CHECK_STATE_CONTENT) && (line_status == LINE_OK)) ||
-	    ((line_status == parse_line()) == LINE_OK)) {
+	    ((line_status = parse_line()) == LINE_OK)) {
 		text = get_line();
 		m_start_line = m_checked_idx;
 		printf("got 1 http line:%s\n", text);
@@ -392,12 +387,11 @@ bool http_conn::write() {
 				init();
 				modfd(m_epollfd, m_sockfd, EPOLLIN);
 				return true;
-			}
-			else {
+			} else {
 				modfd(m_epollfd, m_sockfd, EPOLLIN);
 				return false;
-            }
-        }
+			}
+		}
 	}
 }
 
@@ -426,7 +420,7 @@ bool http_conn::add_status_line(int status, const char* title) {
 
 bool http_conn::add_headers(int content_len) {
 
-    bool flag = 1;
+	bool flag = 1;
 	flag = flag && add_content_length(content_len);
 	flag = flag && add_linger();
 	flag = flag && add_blank_line();
@@ -439,13 +433,14 @@ bool http_conn::add_content_length(int content_len) {
 }
 
 bool http_conn::add_linger() {
-	return add_response("Connection:%s\r\n",(m_linger == true)?"keep-alive":"close");
+	return add_response("Connection:%s\r\n",
+	                    (m_linger == true) ? "keep-alive" : "close");
 }
 
 bool http_conn::add_blank_line() { return add_response("%s", "\r\n"); }
 
 bool http_conn::add_content(const char* content) {
-	return add_response("%s",content);
+	return add_response("%s", content);
 }
 
 // 根据服务器处理 HTTP 请求结果，决定返回客户端内容
@@ -508,7 +503,7 @@ bool http_conn::process_write(HTTP_CODE ret) {
 
 			if (!add_content(ok_string))
 				return false;
-        }
+		}
 	}
 	default:
 		return false;
@@ -519,7 +514,6 @@ bool http_conn::process_write(HTTP_CODE ret) {
 	m_iv_count = 1;
 	return true;
 }
-
 
 // 线程池中工作线程调用程序，即HTTP请求处理入口函数
 void http_conn::process() {
@@ -533,9 +527,8 @@ void http_conn::process() {
 	bool write_ret = process_write(read_ret);
 
 	if (!write_ret) {
-        close_conn();
+		close_conn();
 	}
 
 	modfd(m_epollfd, m_sockfd, EPOLLOUT);
 }
-
