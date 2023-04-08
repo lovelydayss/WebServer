@@ -8,9 +8,9 @@ a simple webserver program for C++ backend and Audio ...
 
 ## 学习之路
 
-| 博客/文档名称  | 简要描述 | 位置链接 |
-| -------------- | -------- | -------- |
-| WebServer 0.01 | xxx      | xxx      |
+| 博客/文档名称  |                                             简要描述                                             | 完成情况        | 位置链接 |
+| -------------- | :-----------------------------------------------------------------------------------------------: | --------------- | -------- |
+| WebServer 0.01 | 对于游双《Linux 高性能服务器编程》书籍的阅读总结，包括对于其最后示例即项目 WebServer 0.01 的整理 | To be completed | xxxxx    |
 
 &nbsp;
 
@@ -18,12 +18,14 @@ a simple webserver program for C++ backend and Audio ...
 
 ### 基础组件
 
-|      名称      |                           介绍                           | 位置                |    完成情况    | 测试            | 仓库位置                                             |
-| :------------: | :-------------------------------------------------------: | ------------------- | :-------------: | --------------- | ---------------------------------------------------- |
-|   ThreadPool   |              a high performance thread pool              | base/ThreadPool     |    completed    | To be completed | [ThreadPool](https://github.com/lovelydayss/ThreadPool) |
-|   JsonParser   | a JSON parser implemented using a regular matching method | base/JsonParser     | To be completed | To be completed | not yet                                              |
-| ConnectionPool |      a connection pool that supports Redis and MySQL      | base/ConnectionPool | To be completed | To be completed | not yet                                              |
-|      Net      |                            a                             |                     |                |                 |                                                      |
+|      名称      | 介绍                                                                         |        位置        |     完成情况     |      测试      |                       仓库位置                       |
+| :------------: | :--------------------------------------------------------------------------- | :-----------------: | :---------------: | :-------------: | :--------------------------------------------------: |
+|   ThreadPool   | A high performance thread pool                                               |   base/ThreadPool   |     Completed     | To be completed | [ThreadPool](https://github.com/lovelydayss/ThreadPool) |
+|   JsonParser   | A JSON parser implemented using a regular matching method                    |   base/JsonParser   | Under development | To be completed |                       not yet                       |
+| ConnectionPool | A connection pool that supports Redis and MySQL                              | base/ConnectionPool |  To be completed  | To be completed |                       not yet                       |
+|      Net      | A network framework library implemented using the remaining basic components |       ......       |  To be completed  | To be completed |                       not yet                       |
+
+&nbsp;
 
 ### webserver
 
