@@ -46,6 +46,8 @@ a simple webserver program for C++ backend and Audio ...
 
 **2023-4-8** 更新，完成游双《Linux 高性能服务器编程》最后示例服务器程序，使用 gdb 调试跑通，可实现对于 template 文件目录下文件的访问。更新 Readme 中组成部件部分，规划项目下一步开发方向  [git-commit](https://github.com/lovelydayss/WebServer/commit/aa693dc7abaf539a41da01b9b282a2c87349f242)
 
-**2023-4-9** 更新，确定 MyJson 开发思路。即在 nlohmann Json 的接口规范下完成自己的 tiny Json 开发，保证可以使用 nlohmann Json 对自己 tiny Json 进行无缝替代。 [git-commit](https://github.com/lovelydayss/WebServer/commit/c65e08ed281660e47da46dd1400594310ab07d79)
+**2023-4-9** 更新，确定 MyJson 开发思路。即在 nlohmann Json 的接口规范下完成自己的 tiny Json 开发，保证可以使用 nlohmann Json 对自己 tiny Json 进行无缝替代 [git-commit](https://github.com/lovelydayss/WebServer/commit/c65e08ed281660e47da46dd1400594310ab07d79)
+
+**2023-4-10** 更新，开始写 miloyip 大佬的《从零开始的 JSON 库教程》，写完了前两个 tutorial，即 JsonParser 的 null，true，false，number等类型解析。之后几天的更新也将会集中在JsonParser 库的实现上 [git-commit](https://github.com/lovelydayss/WebServer/commit/c65e08ed281660e47da46dd1400594310ab07d79)
 
 &nbsp;
