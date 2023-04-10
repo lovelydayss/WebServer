@@ -8,8 +8,8 @@ a simple webserver program for C++ backend and Audio ...
 
 ## 学习之路
 
-| 博客/文档名称  |                                             简要描述                                             | 完成情况        | 位置链接           |
-| -------------- | :-----------------------------------------------------------------------------------------------: | --------------- | ------------------ |
+| 博客/文档名称  | 简要描述                                                                                          |    完成情况    |      位置链接      |
+| -------------- | ------------------------------------------------------------------------------------------------- | :-------------: | :----------------: |
 | WebServer 0.01 | 对于游双《Linux 高性能服务器编程》书籍的阅读总结，包括对于其最后示例即项目 WebServer 0.01 的整理 | To be completed | WebServer 0.01/doc |
 
 &nbsp;
@@ -29,12 +29,12 @@ a simple webserver program for C++ backend and Audio ...
 
 ### WebServer
 
-| 名称           | 介绍                                                                                                                                           | 位置           |     完成情况     |      测试      |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | :---------------: | :-------------: |
-| WebServer 0.01 | 参考游双《Linux 高性能服务器编程》中最后示例实现的基于线程池的 HTTP 服务器。其中线程池使用部件 ThreadPool，其余程序代码与原著中程序保持一致。 | WebServer 0.01 |     Completed     | To be completed |
-| WebServer 0.1  | 在 WebServer 0.01 基础上改用 Modern C++ 语法开发，对于 HTTP 协议解析由状态机改用正则匹配方法，支持更多样请求方法。                             | WebServer 0.1  | Under development | To be completed |
-| WebServer 1.0  | 在 WebServer 0.1 基础上使用 JsonParser 组件库支持 Json 格式请求体传输，使用 ConnectionPool 组件库支持 Redis、MySQL 数据库连接与操作。         | WebServer 1.0  |  To be completed  | To be completed |
-| WebServer 1.1  | 在 WebServer 0.2 基础上将对于 HTTP 协议解析交由组件库处理，基本完成对于 HTTP 协议的支持，支持更多服务层协议 ........                          | WebServer 1.1  |  To be completed  | To be completed |
+| 版本名称 | 介绍                                                                                                                                           | 位置           |     完成情况     |      测试      |
+| :------: | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | :---------------: | :-------------: |
+|  v0.01  | 参考游双《Linux 高性能服务器编程》中最后示例实现的基于线程池的 HTTP 服务器。其中线程池使用部件 ThreadPool，其余程序代码与原著中程序保持一致。 | WebServer 0.01 |     Completed     | To be completed |
+|   v0.1   | 在 WebServer 0.01 基础上改用 Modern C++ 语法开发，对于 HTTP 协议解析由状态机改用正则匹配方法，支持更多样请求方法。                             | WebServer 0.1  | Under development | To be completed |
+|   v1.0   | 在 WebServer 0.1 基础上使用 JsonParser 组件库支持 Json 格式请求体传输，使用 ConnectionPool 组件库支持 Redis、MySQL 数据库连接与操作。         | WebServer 1.0  |  To be completed  | To be completed |
+|   v1.1   | 在 WebServer 0.2 基础上将对于 HTTP 协议解析交由组件库处理，基本完成对于 HTTP 协议的支持，支持更多服务层协议 ........                          | WebServer 1.1  |  To be completed  | To be completed |
 
 &nbsp;
 
