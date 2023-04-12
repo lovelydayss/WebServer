@@ -38,7 +38,7 @@ struct lept_value {
 		double n; /* 双精度浮点数存储数字 */
 	} u;
 
-	lept_type type; /* json 值类型 */
+	lept_type type; /* Json 值类型 */
 };
 
 struct lept_member {
@@ -71,11 +71,14 @@ enum {
 	LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET   /* 对象未闭合 */
 };
 
-/* json 解析函数 */
+/* Json 解析函数 */
 /* 传入一个 json（const char* 类型），一个解析后的 json */
 /* 结构体指针（使用时分配空间） */
 /* JSON-text = ws value ws */
 int lept_parse(lept_value* v, const char* json);
+
+/* Json 生成函数 */
+char* lept_stringify(const lept_value* v, size_t* length);
 
 /* Json 值类型释放 */
 void lept_free(lept_value* v);
