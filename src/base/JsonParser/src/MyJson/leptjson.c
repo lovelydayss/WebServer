@@ -3,7 +3,6 @@
 #include <errno.h>
 #include <math.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -81,6 +80,9 @@ static void lept_encode_utf8(lept_context* c, unsigned u);
 /* string = "string" */
 static int lept_parse_string(lept_context* c, lept_value* v);
 
+/* array = "array" */
+static int lept_parse_array(lept_context* c, lept_value* v);
+
 /* value = null / false / true / number */
 static int lept_parse_value(lept_context* c, lept_value* v);
 
@@ -117,12 +119,22 @@ int lept_parse(lept_value* v, const char* json) {
 }
 
 void lept_free(lept_value* v) {
+	size_t i;
 	assert(v != NULL);
-
-	/* 对于 string 特殊处理 */
-	if (v->type == LEPT_STRING)
+	switch (v->type) {
+	/* string 处理 */
+	case LEPT_STRING:
 		free(v->u.s.s);
-
+		break;
+	/* array 处理 */
+	case LEPT_ARRAY:
+		for (i = 0; i < v->u.a.size; i++)
+			lept_free(&v->u.a.e[i]);
+		free(v->u.a.e);
+		break;
+	default:
+		break;
+	}
 	v->type = LEPT_NULL;
 }
 
@@ -185,6 +197,19 @@ void lept_set_string(lept_value* v, const char* s, size_t len) {
 
 	v->type = LEPT_STRING;
 	v->u.s.len = len;
+}
+
+/* 获取 array 数组元素数和元素值 */
+/* 对于读取，若要复制其深拷贝交由调用处实现 */
+size_t lept_get_array_size(const lept_value* v) {
+	assert(v != NULL && v->type == LEPT_ARRAY);
+	return v->u.a.size;
+}
+
+lept_value* lept_get_array_element(const lept_value* v, size_t index) {
+	assert(v != NULL && v->type == LEPT_ARRAY);
+	assert(index < v->u.a.size);
+	return &v->u.a.e[index];
 }
 
 /*******************************/
@@ -440,6 +465,56 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
 	}
 }
 
+static int lept_parse_array(lept_context* c, lept_value* v) {
+	size_t i, size = 0;
+	int ret;
+	EXPECT(c, '[');
+	lept_parse_whitespace(c);
+
+	/* 空类型数组解析 */
+	if (*c->json == ']') {
+		c->json++;
+		v->type = LEPT_ARRAY;
+		v->u.a.size = 0;
+		v->u.a.e = NULL;
+		return LEPT_PARSE_OK;
+	}
+
+	for (;;) {
+		lept_value e;
+		lept_value_init(&e);
+		ret = lept_parse_value(c, &e);
+		if (ret != LEPT_PARSE_OK)
+			break;
+
+		memcpy(lept_context_push(c, sizeof(lept_value)), &e,
+		       sizeof(lept_value));
+		size++;
+		lept_parse_whitespace(c);
+		if (*c->json == ',') {
+			c->json++;
+			lept_parse_whitespace(c);
+		} else if (*c->json == ']') {
+			c->json++;
+			v->type = LEPT_ARRAY;
+			v->u.a.size = size;
+			size *= sizeof(lept_value);
+			memcpy(v->u.a.e = (lept_value*)malloc(size),
+			       lept_context_pop(c, size), size);
+			return LEPT_PARSE_OK;
+		} else {
+			ret = LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+			break;
+		}
+	}
+
+	/* 此处释放栈空间主要目的在于对栈进行复原 */
+	for (i = 0; i < size; i++)
+		lept_free((lept_value*)lept_context_pop(c, sizeof(lept_value)));
+
+	return ret;
+}
+
 static int lept_parse_value(lept_context* c, lept_value* v) {
 	switch (*c->json) {
 	case 'n':
@@ -450,6 +525,8 @@ static int lept_parse_value(lept_context* c, lept_value* v) {
 		return lept_parse_literal(c, v, "true", LEPT_TRUE);
 	case '"':
 		return lept_parse_string(c, v);
+	case '[':
+		return lept_parse_array(c, v);
 	case '\0':
 		return LEPT_PARSE_EXPECT_VALUE;
 	default:

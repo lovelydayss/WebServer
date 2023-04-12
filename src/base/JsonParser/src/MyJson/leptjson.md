@@ -18,4 +18,8 @@ valgrind --leak-check=full  ./leptjson_test
 
 ### unicode 编码
 
-### tutorial 5
+## tutorial 5
+
+动态数组实现数组
+
+## tutorial 6
