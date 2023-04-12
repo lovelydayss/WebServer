@@ -23,3 +23,5 @@ valgrind --leak-check=full  ./leptjson_test
 动态数组实现数组
 
 ## tutorial 6
+
+采用 map 实现对象
