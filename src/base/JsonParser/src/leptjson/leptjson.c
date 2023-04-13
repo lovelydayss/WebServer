@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -140,16 +141,56 @@ int lept_parse(lept_value* v, const char* json) {
 	return ret;
 }
 
-char* lept_stringify(const lept_value* v, size_t* length) {
-	lept_context c;
+void lept_stringify(const lept_value* v, char* s, size_t* length) {
 	assert(v != NULL);
-	c.stack = (char*)malloc(c.size = LEPT_PARSE_STRINGIFY_INIT_SIZE);
-	c.top = 0;
-	lept_stringify_value(&c, v);
+
+	lept_context* c = (lept_context*)malloc(sizeof(lept_context));
+	c->stack = (char*)malloc(c->size = LEPT_PARSE_STRINGIFY_INIT_SIZE);
+	c->top = 0;
+
+	lept_stringify_value(c, v);
+
 	if (length)
-		*length = c.top;
-	PUTC(&c, '\0');
-	return c.stack;
+		*length = c->top;
+	PUTC(c, '\0');
+
+	memcpy(s, c->stack, (*length)++);
+
+	lept_context_free(c);
+}
+
+void lept_copy(lept_value* dst, const lept_value* src) {
+	assert(src != NULL && dst != NULL && src != dst);
+	switch (src->type) {
+	case LEPT_STRING:
+		lept_set_string_copy(dst, src->u.s.s, src->u.s.len);
+		break;
+	case LEPT_ARRAY:
+		lept_set_array_copy(dst, src->u.a.e, src->u.a.size, src->u.a.capacity);
+		break;
+	case LEPT_OBJECT:
+		lept_set_object_copy(dst, src->u.o.m, src->u.o.size, src->u.o.capacity);
+		break;
+	default:
+		lept_free(dst);
+		memcpy(dst, src, sizeof(lept_value));
+		break;
+	}
+}
+void lept_move(lept_value* dst, lept_value* src) {
+	assert(dst != NULL && src != NULL && src != dst);
+	lept_free(dst);
+	memcpy(dst, src, sizeof(lept_value));
+	lept_value_init(src);
+}
+void lept_swap(lept_value* lhs, lept_value* rhs) {
+	assert(lhs != NULL && rhs != NULL);
+	if (lhs != rhs) {
+		lept_value temp;
+		memcpy(&temp, lhs, sizeof(lept_value));
+		memcpy(lhs, rhs, sizeof(lept_value));
+		memcpy(rhs, &temp, sizeof(lept_value));
+	}
 }
 
 void lept_free(lept_value* v) {
@@ -180,6 +221,44 @@ void lept_free(lept_value* v) {
 }
 
 lept_type lept_get_type(const lept_value* v) { return v->type; }
+
+/* 如要考虑同元素不同排序问题，则需要逐层递归排序，开销较大 */
+/* 此处将不同排序对象视为不同对象 */
+/* 在 mJson 中将实现两个版本 */
+int lept_is_equal(const lept_value* lhs, const lept_value* rhs) {
+	size_t i;
+	assert(lhs != NULL && rhs != NULL);
+	if (lhs->type != rhs->type)
+		return 0;
+	switch (lhs->type) {
+	case LEPT_STRING:
+		return lhs->u.s.len == rhs->u.s.len &&
+		       memcmp(lhs->u.s.s, rhs->u.s.s, lhs->u.s.len) == 0;
+	case LEPT_NUMBER:
+		return lhs->u.n == rhs->u.n;
+	case LEPT_ARRAY:
+		if (lhs->u.a.size != rhs->u.a.size)
+			return 0;
+		for (i = 0; i < lhs->u.a.size; i++)
+			if (!lept_is_equal(&lhs->u.a.e[i], &rhs->u.a.e[i]))
+				return 0;
+		return 1;
+	case LEPT_OBJECT:
+		if (lhs->u.o.size != rhs->u.o.size)
+			return 0;
+		for (i = 0; i < lhs->u.o.size; i++) {
+			if (lhs->u.o.m[i].klen != rhs->u.o.m[i].klen)
+				return 0;
+			if (!memcmp(lhs->u.o.m[i].k, rhs->u.o.m[i].k, lhs->u.o.m[i].klen))
+				return 0;
+			if (!lept_is_equal(&lhs->u.o.m[i].v, &rhs->u.o.m[i].v))
+				return 0;
+		}
+		return 1;
+	default:
+		return 1;
+	}
+}
 
 /* 获取和写入 bollean 值 */
 int lept_get_boolean(const lept_value* v) {
@@ -220,45 +299,240 @@ size_t lept_get_string_length(const lept_value* v) {
 	assert(v != NULL && v->type == LEPT_STRING);
 	return v->u.s.len;
 }
-void lept_set_string(lept_value* v, const char* s, size_t len) {
+void lept_set_string_copy(lept_value* v, const char* s, size_t len) {
 
 	/* lept_free() 中存在空断言 */
 	/* assert(v!= NULL); */
 	/* 此处由于对 s 进行读，所以该断言仍然需要保留 */
 
 	assert(v != NULL && (s != NULL || len == 0));
-	lept_free(v);
 
-	/* 必须执行深拷贝 */
-	v->u.s.s = (char*)malloc(len + 1);
+	/* 执行深拷贝 */
+	char* tmp = (char*)malloc(len + 1);
 	memcpy(v->u.s.s, s, len);
 
 	/* 补充尾部 '\0' 字符 */
-	v->u.s.s[len] = '\0';
+	tmp[len] = '\0';
 
-	v->type = LEPT_STRING;
+	lept_set_string_move(v, tmp, len + 1);
+}
+void lept_set_string_move(lept_value* v, char* s, size_t len) {
+
+	assert(v != NULL && (s != NULL || len == 0));
+	lept_free(v);
+
+	v->u.s.s = s;
 	v->u.s.len = len;
+	v->type = LEPT_STRING;
 }
 
-/* 获取 array 数组元素数和元素值 */
-/* 对于读取，若要复制其深拷贝交由调用处实现 */
+/* 获取和写入 array 数组元素数和元素值 */
+/* 没看 miloyip 大佬该函数含义，遂按照前文 set 函数进行修改 */
+/* 原文中该函数放入 lept_set_array_move 中，当输入 e=NULL && size == 0 调用 */
+void lept_set_array_copy(lept_value* v, const lept_value* e, size_t size,
+                         size_t capacity) {
+	assert(v != NULL && (e != NULL || size == 0));
+
+	lept_value* tmp = (lept_value*)malloc(capacity * sizeof(lept_value));
+	memcpy(v->u.a.e, e, size * sizeof(lept_value));
+
+	lept_set_array_move(v, tmp, size, capacity);
+}
+void lept_set_array_move(lept_value* v, lept_value* e, size_t size,
+                         size_t capacity) {
+	assert(v != NULL);
+	lept_free(v);
+
+	if (e == NULL && size == 0) {
+		v->type = LEPT_ARRAY;
+		v->u.a.size = size;
+		v->u.a.capacity = capacity;
+		v->u.a.e = capacity > 0
+		               ? (lept_value*)malloc(capacity * sizeof(lept_value))
+		               : NULL;
+		return;
+	}
+
+	v->type = LEPT_ARRAY;
+	v->u.a.size = size;
+	v->u.a.capacity = capacity;
+	v->u.a.e = e;
+}
+
 size_t lept_get_array_size(const lept_value* v) {
 	assert(v != NULL && v->type == LEPT_ARRAY);
 	return v->u.a.size;
 }
+size_t lept_get_array_capacity(const lept_value* v) {
+	assert(v != NULL && v->type == LEPT_ARRAY);
+	return v->u.a.capacity;
+}
 
-lept_value* lept_get_array_element(const lept_value* v, size_t index) {
+void lept_reserve_array(lept_value* v, size_t capacity) {
+	assert(v != NULL && v->type == LEPT_ARRAY);
+	if (v->u.a.capacity < capacity) {
+		v->u.a.capacity = capacity;
+		v->u.a.e =
+		    (lept_value*)realloc(v->u.a.e, capacity * sizeof(lept_value));
+	}
+}
+/* 这直接把 capacity 设置成 size 大小 */
+/* 这里会不会有性能问题？ 因为下次执行插入的时候必定会执行扩容 */
+void lept_shrink_array(lept_value* v) {
+	assert(v != NULL && v->type == LEPT_ARRAY);
+	if (v->u.a.capacity > v->u.a.size) {
+		v->u.a.capacity = v->u.a.size;
+		v->u.a.e = (lept_value*)realloc(v->u.a.e,
+		                                v->u.a.capacity * sizeof(lept_value));
+	}
+}
+void lept_clear_array(lept_value* v) {
+	assert(v != NULL && v->type == LEPT_ARRAY);
+	lept_erase_array_element(v, 0, v->u.a.size);
+
+	/* clear 时容量剩余值不会改变 */
+	/* 需使用 lept_shrink_array 手动释放剩余内存 */
+
+	/* lept_shrink_array(v); */
+}
+
+const lept_value* lept_get_array_element(const lept_value* v, size_t index) {
 	assert(v != NULL && v->type == LEPT_ARRAY);
 	assert(index < v->u.a.size);
 	return &v->u.a.e[index];
 }
+void lept_pushback_array_element(lept_value* v, const lept_value* e) {
+	assert(v != NULL && e != NULL && v->type == LEPT_ARRAY);
+	if (v->u.a.size + 1 == v->u.a.capacity)
+		lept_reserve_array(v, v->u.a.capacity == 0 ? 1 : v->u.a.capacity * 2);
 
-/* 获取 Json 对象 */
+	lept_copy((v->u.a.e) + v->u.a.size - 1, e);
+}
+void lept_popback_array_element(lept_value* v) {
+	assert(v != NULL && v->type == LEPT_ARRAY && v->u.a.size > 0);
+	v->u.a.size--;
+	lept_free((v->u.a.e) + v->u.a.size - 1);
+}
+void lept_insert_array_element(lept_value* v, const lept_value* e,
+                               size_t index) {
+	assert(v != NULL && v->type == LEPT_ARRAY && index <= v->u.a.size);
+
+	// 容量不够，扩容
+	if (v->u.a.size + 1 == v->u.a.capacity)
+		lept_reserve_array(v, v->u.a.capacity == 0 ? 1 : v->u.a.capacity * 2);
+
+	size_t i;
+	// 插入
+	for (i = v->u.a.size - 2; i >= index; i--)
+		lept_move((v->u.a.e) + i + 1, (v->u.a.e) + i);
+
+	lept_copy((v->u.a.e) + index, e);
+}
+void lept_erase_array_element(lept_value* v, size_t index, size_t count) {
+
+	/* 断言中设置了删除范围在 size
+	 * 内，故考虑直接将删除位置两侧的值拷贝到新的数组中 */
+	assert(v != NULL && v->type == LEPT_ARRAY && index + count <= v->u.a.size);
+
+	/* 分配删除后数组大小两倍的空间，如果删除后 size 为 0 则分配一个空间 */
+	size_t new_size = v->u.a.size - count;
+	size_t new_capacity = 2 * new_size + 1;
+	lept_value* tmp = malloc(new_size * sizeof(lept_value));
+
+	size_t i = 0;
+	/* 拷贝删除区间左侧区间值 */
+	for (i = 0; i < index; i++)
+		lept_copy(tmp + i, v + i);
+
+	/* 拷贝删除区间右侧区间值 */
+	for (i = index + count; i < v->u.a.size; i++)
+		lept_copy(tmp + i - count, v + i);
+
+	lept_set_array_move(v, tmp, new_size, new_capacity);
+}
+
+/* 获取和写入 Json 对象 */
 /* 对于读取，若要复制其深拷贝交由调用处实现 */
+void lept_set_object_copy(lept_value* v, const lept_member* s, size_t size,
+                          size_t capacity) {
+
+	assert(v != NULL && (s != NULL || size == 0));
+
+	int i = 0;
+
+	lept_member* tmp = (lept_member*)malloc(capacity * sizeof(lept_member));
+
+	for (i = 0; i < size; i++) {
+		tmp[i].klen = s[i].klen;
+		tmp[i].k = (char*)malloc(s[i].klen);
+		memcpy(tmp[i].k, s->k, s[i].klen);
+
+		lept_copy(&(tmp[i].v), &(s[i].v));
+	}
+
+	lept_set_object_move(v, tmp, size, capacity);
+}
+
+void lept_set_object_move(lept_value* v, lept_member* s, size_t size,
+                          size_t capacity) {
+	assert(v != NULL);
+	lept_free(v);
+
+	/* 此时对容量执行操作 */
+	if (s == NULL && size == 0) {
+		v->type = LEPT_OBJECT;
+		v->u.o.size = size;
+		v->u.o.capacity = capacity;
+		v->u.o.m = capacity > 0
+		               ? (lept_member*)malloc(capacity * sizeof(lept_member))
+		               : NULL;
+		return;
+	}
+
+	v->type = LEPT_OBJECT;
+	v->u.o.size = size;
+	v->u.o.capacity = capacity;
+	v->u.o.m = s;
+}
+
 size_t lept_get_object_size(const lept_value* v) {
 	assert(v != NULL && v->type == LEPT_OBJECT);
 	return v->u.o.size;
 }
+size_t lept_get_object_capacity(const lept_value* v) {
+	assert(v != NULL && v->type == LEPT_OBJECT);
+	return v->u.o.capacity;
+	return 0;
+}
+
+void lept_reserve_object(lept_value* v, size_t capacity) {
+	assert(v != NULL && v->type == LEPT_OBJECT);
+	if (v->u.o.capacity < capacity) {
+		v->u.o.capacity = capacity;
+		v->u.o.m =
+		    (lept_member*)realloc(v->u.o.m, capacity * sizeof(lept_member));
+	}
+}
+
+void lept_shrink_object(lept_value* v) {
+	assert(v != NULL && v->type == LEPT_OBJECT);
+	if (v->u.o.capacity > v->u.o.size) {
+		v->u.o.capacity = v->u.o.size;
+		v->u.o.m = (lept_member*)realloc(v->u.o.m,
+		                                 v->u.o.capacity * sizeof(lept_member));
+	}
+}
+void lept_clear_object(lept_value* v) {
+	assert(v != NULL && v->type == LEPT_OBJECT);
+
+	/* 懒得去实现了，就逐个删得了  */
+	size_t i;
+	for (i = 0; i < v->u.o.size; i++)
+		lept_remove_object_value_by_index(v, i);
+
+	lept_free(v);
+}
+
 const char* lept_get_object_key(const lept_value* v, size_t index) {
 	assert(v != NULL && v->type == LEPT_OBJECT);
 	assert(index < v->u.o.size);
@@ -270,10 +544,72 @@ size_t lept_get_object_key_length(const lept_value* v, size_t index) {
 	return v->u.o.m[index].klen;
 }
 
-lept_value* lept_get_object_value(const lept_value* v, size_t index) {
+const lept_value* lept_get_object_value_by_index(const lept_value* v,
+                                                 size_t index) {
 	assert(v != NULL && v->type == LEPT_OBJECT);
 	assert(index < v->u.o.size);
 	return &v->u.o.m[index].v;
+}
+const lept_value* lept_get_object_value_by_key(const lept_value* v,
+                                               const char* key, size_t klen) {
+	return lept_find_object_value(v, key, klen);
+}
+
+void lept_remove_object_value_by_index(lept_value* v, size_t index) {
+	assert(v != NULL && v->type == LEPT_OBJECT && index < v->u.o.size);
+
+	size_t i;
+	for (i = index; i < v->u.o.size; i++)
+		v->u.o.m[i] = v->u.o.m[i + 1];
+
+	if ((v->u.o.size + 1) * 3 < v->u.o.capacity)
+		lept_reserve_object(v, v->u.o.size * 2);
+}
+int lept_remove_object_value_by_key(lept_value* v, const char* key,
+                                    size_t klen) {
+	size_t index = lept_find_object_index(v, key, klen);
+	if (index == LEPT_KEY_NOT_EXIST)
+		return 0;
+
+	lept_remove_object_value_by_index(v, index);
+	return 1;
+}
+
+int lept_set_object_value_copy(lept_value* v, const char* key, size_t klen,
+                               const lept_value* s_v) {
+	size_t index = lept_find_object_index(v, key, klen);
+
+	if (index == LEPT_KEY_NOT_EXIST)
+		return 0;
+
+	lept_copy(&v->u.o.m->v, s_v);
+	return 1;
+}
+int lept_set_object_value_move(lept_value* v, const char* key, size_t klen,
+                               lept_value* s_v) {
+	size_t index = lept_find_object_index(v, key, klen);
+
+	if (index == LEPT_KEY_NOT_EXIST)
+		return 0;
+
+	lept_move(&v->u.o.m->v, s_v);
+	return 1;
+}
+
+/* find 查找 */
+size_t lept_find_object_index(const lept_value* v, const char* key,
+                              size_t klen) {
+	size_t i;
+	assert(v != NULL && v->type == LEPT_OBJECT && key != NULL);
+	for (i = 0; i < v->u.o.size; i++)
+		if (v->u.o.m[i].klen == klen && memcmp(v->u.o.m[i].k, key, klen) == 0)
+			return i;
+	return LEPT_KEY_NOT_EXIST;
+}
+const lept_value* lept_find_object_value(const lept_value* v, const char* key,
+                                         size_t klen) {
+	size_t index = lept_find_object_index(v, key, klen);
+	return index != LEPT_KEY_NOT_EXIST ? &v->u.o.m[index].v : NULL;
 }
 
 /*******************************/
@@ -533,7 +869,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
 	size_t len;
 	int ret = lept_parse_string_raw(c, &s, &len);
 	if (ret == LEPT_PARSE_OK)
-		lept_set_string(v, s, len);
+		lept_set_string_copy(v, s, len);
 	return ret;
 }
 
@@ -546,9 +882,7 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
 	/* 空类型数组解析 */
 	if (*c->json == ']') {
 		c->json++;
-		v->type = LEPT_ARRAY;
-		v->u.a.size = 0;
-		v->u.a.e = NULL;
+		lept_set_array_move(v, NULL, 0, 0);
 		return LEPT_PARSE_OK;
 	}
 
@@ -568,11 +902,11 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
 			lept_parse_whitespace(c);
 		} else if (*c->json == ']') {
 			c->json++;
-			v->type = LEPT_ARRAY;
+			lept_set_array_move(v, NULL, 0, size);
+			memcpy(v->u.a.e, lept_context_pop(c, size * sizeof(lept_value)),
+			       size * sizeof(lept_value));
 			v->u.a.size = size;
-			size *= sizeof(lept_value);
-			memcpy(v->u.a.e = (lept_value*)malloc(size),
-			       lept_context_pop(c, size), size);
+
 			return LEPT_PARSE_OK;
 		} else {
 			ret = LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
@@ -596,11 +930,10 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
 	lept_parse_whitespace(c);
 
 	/* 空对象处理 */
+	/* 可以考虑将空初始化抽象成函数 */
 	if (*c->json == '}') {
 		c->json++;
-		v->type = LEPT_OBJECT;
-		v->u.o.m = 0;
-		v->u.o.size = 0;
+		lept_set_object_move(v, NULL, 0, 0);
 		return LEPT_PARSE_OK;
 	}
 
@@ -647,10 +980,10 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
 		} else if (*c->json == '}') {
 			size_t s = sizeof(lept_member) * size;
 			c->json++;
-			v->type = LEPT_OBJECT;
+			lept_set_object_move(v, NULL, 0, size);
+			memcpy(v->u.o.m, lept_context_pop(c, sizeof(lept_member) * size),
+			       sizeof(lept_member) * size);
 			v->u.o.size = size;
-			memcpy(v->u.o.m = (lept_member*)malloc(s), lept_context_pop(c, s),
-			       s);
 			return LEPT_PARSE_OK;
 		} else {
 			ret = LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET;
