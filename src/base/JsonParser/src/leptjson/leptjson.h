@@ -3,7 +3,7 @@
 
 #include <stddef.h> /* size_t */
 
-/* Json 数值合法类型 */
+/* Json 数值类型 */
 typedef enum {
 	LEPT_NULL,
 	LEPT_FALSE,
@@ -14,6 +14,7 @@ typedef enum {
 	LEPT_OBJECT,
 } lept_type;
 
+/* Json 对象操作返回 */
 typedef enum {
 	INSERT_OBJECT_OK,
 	MODIFY_OBJECT_OK,
@@ -51,6 +52,7 @@ struct lept_value {
 	lept_type type; /* Json 值类型 */
 };
 
+/* Json 对象基本元素类型 */
 struct lept_member {
 	char* k;
 	size_t klen;  /* key string*/
@@ -63,7 +65,8 @@ struct lept_member {
 		(v)->type = LEPT_NULL; \
 	} while (0)
 
-/* 返回类型 */
+
+/* Json 解析返回类型 */
 enum {
 	LEPT_PARSE_OK,                /* 成功解析 */
 	LEPT_PARSE_EXPECT_VALUE,      /* 空的 Json */
@@ -82,9 +85,6 @@ enum {
 };
 
 /* Json 解析函数 */
-/* 传入一个 json（const char* 类型），一个解析后的 json */
-/* 结构体指针（使用时分配空间） */
-/* JSON-text = ws value ws */
 int lept_parse(lept_value* v, const char* json);
 
 /* Json 生成函数 */
@@ -123,13 +123,8 @@ size_t lept_get_string_length(const lept_value* v);
 void lept_set_string(lept_value* v, const char* s, size_t len);
 
 /* 数组 */
-/* 构造数组值 */
-/*
-void lept_set_array_copy(lept_value* v, const lept_value* e, size_t size,
-                         size_t capacity);
-void lept_set_array_move(lept_value* v, lept_value* e, size_t size,
-                         size_t capacity);
-*/
+
+/* 初始化 array 类型值 */
 void lept_set_array(lept_value* v, size_t capacity);
 
 /* 获取数组容量信息 */
@@ -137,7 +132,7 @@ size_t lept_get_array_size(const lept_value* v);
 size_t lept_get_array_capacity(const lept_value* v);
 
 /* 动态数组操作 */
-/* 调整容量，降低容量以适应 size ，清空数组 */
+/* 扩张容量，降低容量以适应 size ，清空数组 */
 void lept_reserve_array(lept_value* v, size_t capacity);
 void lept_shrink_array(lept_value* v);
 void lept_clear_array(lept_value* v);
@@ -153,30 +148,25 @@ void lept_erase_array_element(lept_value* v, size_t index, size_t count);
 
 /* Json 对象操作 */
 
-/* 构造 Json 对象 */
-/*
-void lept_set_object_copy(lept_value* v, const lept_member* s, size_t size,
-                          size_t capacity);
-void lept_set_object_move(lept_value* v, lept_member* s, size_t size,
-                          size_t capacity);
-*/
+/* 初始化 Json 对象 */
 void lept_set_object(lept_value* v, size_t capacity);
 
 /* 获取 Json 对象数组容量信息 */
 size_t lept_get_object_size(const lept_value* v);
 size_t lept_get_object_capacity(const lept_value* v);
 
-/* 调整容量，降低容量以适应 size ，清空数组 */
+/* 扩张容量，降低容量以适应 size ，清空数组 */
 void lept_reserve_object(lept_value* v, size_t capacity);
 void lept_shrink_object(lept_value* v);
 void lept_clear_object(lept_value* v);
 
-/* 单个对象键操作 */
+/* Json 单个对象键操作 */
 /* 对于对象常用键值进行操作，这个从 index 获得键值函数注定意义不大 */
 const char* lept_get_object_key(const lept_value* v, size_t index);
 size_t lept_get_object_key_length(const lept_value* v, size_t index);
 
-/* 对象值操作 */
+/* Json 对象元素操作 */
+/* 根据索引、键值获取、删除、修改 Json 对象元素值 */
 const lept_value* lept_get_object_value_by_index(const lept_value* v,
                                                  size_t index);
 const lept_value* lept_get_object_value_by_key(const lept_value* v,
@@ -191,7 +181,7 @@ int lept_set_object_value_by_index(lept_value* v, size_t index,
 int lept_set_object_value_by_key(lept_value* v, const char* key, size_t klen,
                                  const lept_value* s_v);
 
-/* find 查找 */
+/* Json 对象中的查找 */
 size_t lept_find_object_index(const lept_value* v, const char* key,
                               size_t klen);
 const lept_value* lept_find_object_value(const lept_value* v, const char* key,

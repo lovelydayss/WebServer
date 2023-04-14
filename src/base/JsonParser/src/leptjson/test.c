@@ -655,34 +655,6 @@ static void test_access_array() {
 
 	lept_value_init(&a);
 
-/* 由于 copy 系列函数会调用 move，故不再对 move 系列函数进行单独测试 */
-/* set_array get_array_szie get_array_capacity ...*/
-#if 0
-	lept_value* tmp = (lept_value*)malloc(5 * sizeof(lept_value));
-	for (i = 0; i < 5; i++) {
-		lept_value_init(&e);
-		lept_set_number(&e, i);
-		lept_copy(tmp + i, &e);
-		lept_free(&e);
-	}
-	lept_set_array_copy(&a, tmp, (size_t)5, (size_t)10);
-	EXPECT_EQ_SIZE_T(5, lept_get_array_size(&a));
-	EXPECT_EQ_SIZE_T(10, lept_get_array_capacity(&a));
-
-	/* reserve shrink */
-	lept_shrink_array(&a);
-	EXPECT_EQ_SIZE_T(lept_get_array_size(&a), lept_get_array_capacity(&a));
-
-	lept_reserve_array(&a, 20);
-	EXPECT_EQ_SIZE_T(20, lept_get_array_capacity(&a));
-	lept_free(&a);
-
-	for (i = 0; i < 5; i++)
-		lept_free(tmp + i);
-	free(tmp);
-
-#endif
-
 	/* push_back lept_set_array_move */
 	for (j = 0; j <= 5; j += 5) {
 		lept_set_array(&a, j);
@@ -771,53 +743,6 @@ static void test_access_object() {
 	size_t i, j, index;
 
 	lept_value_init(&o);
-
-/* 由于 copy 系列函数会调用 move，故不再对 move 系列函数进行单独测试 */
-/* set_object */
-#if 0
-	lept_member* tmp = (lept_member*)malloc(5 * sizeof(lept_member));
-
-	for (i = 0; i < 10; i++) {
-		char key[2] = "a";
-		key[0] += i;
-		lept_value_init(&v);
-		lept_set_number(&v, i);
-
-		size_t klen = 1;
-		(tmp + i)->k = (char*)malloc(klen + 1);
-		memcpy((tmp + i)->k, key, klen);
-		(tmp + i)->k[klen] = '\0';
-
-		(tmp + i)->klen = klen;
-		lept_copy(&tmp->v, &v);
-
-		lept_free(&v);
-	}
-
-	lept_set_object_copy(&o, tmp, (size_t)5, (size_t)10);
-	EXPECT_EQ_SIZE_T(5, lept_get_object_size(&o));
-	EXPECT_EQ_SIZE_T(10, lept_get_object_capacity(&o));
-
-	/* reserve shrink */
-	lept_shrink_object(&o);
-	EXPECT_EQ_SIZE_T(lept_get_object_size(&o), lept_get_object_capacity(&o));
-
-	lept_reserve_object(&o, 20);
-	EXPECT_EQ_SIZE_T(20, lept_get_object_capacity(&o));
-	lept_free(&o);
-
-	/* 释放 tmp */
-	for (i = 0; i < 5; i++) {
-		lept_free(&((tmp + i)->v));
-		free((tmp + i)->k);
-	}
-	free(tmp);
-
-#endif
-
-	/* set_object_value set_object_move */
-	/* 此处 j 可以为任何值，但是为 5 的话会产生 realloc(): invalid next size 的
-	 * segment fault */
 
 	for (j = 0; j <= 5; j += 5) {
 
