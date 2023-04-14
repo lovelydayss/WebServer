@@ -21,7 +21,7 @@ a simple webserver program for C++ backend and Audio ...
 |      名称      | 介绍                                                                         |        位置        |     完成情况     |      测试      |                       仓库位置                       |
 | :------------: | ---------------------------------------------------------------------------- | :-----------------: | :---------------: | :-------------: | :--------------------------------------------------: |
 |   ThreadPool   | A high performance thread pool                                               |   base/ThreadPool   |     Completed     | To be completed | [ThreadPool](https://github.com/lovelydayss/ThreadPool) |
-|   JsonParser   | A JSON parser implemented using a regular matching method                    |   base/JsonParser   | Under development | To be completed |                       not yet                       |
+|   JsonParser   | A JSON parser implemented using a regular matching method                    |   base/JsonParser   | Under development |    Completed    |                       not yet                       |
 | ConnectionPool | A connection pool that supports Redis and MySQL                              | base/ConnectionPool |  To be completed  | To be completed |                       not yet                       |
 |      Net      | A network framework library implemented using the remaining basic components |       ......       |  To be completed  | To be completed |                       not yet                       |
 
@@ -49,5 +49,7 @@ a simple webserver program for C++ backend and Audio ...
 **2023-4-9** 更新，确定 MyJson 开发思路。即在 nlohmann Json 的接口规范下完成自己的 tiny Json 开发，保证可以使用 nlohmann Json 对自己 tiny Json 进行无缝替代 [git-commit](https://github.com/lovelydayss/WebServer/commit/c65e08ed281660e47da46dd1400594310ab07d79)
 
 **2023-4-10** 更新，开始写 miloyip 大佬的《从零开始的 JSON 库教程》，写完了前两个 tutorial，即 JsonParser 的 null，true，false，number 等类型解析。之后几天的更新也将会集中在JsonParser 库的实现上 [git-commit](https://github.com/lovelydayss/WebServer/commit/c9c64d7d9ac5a154769f6c22279f8295aec79f58)
+
+**2023-4-14** 更新，完成《从零开始的 JSON 库教程》的全部 tutorial（包括教程中未实现的 tutorial8 及其扩展），并跑通所有测试用例。下一步将进行文档的整理，整理完成后将进行满足  nlohmann Json 接口规范的 moedrn C++ Json 解析器实现。 [git-commit](https://github.com/lovelydayss/WebServer/commit/ea3ec4e560c0c118842196876bcbdacefdb56253)
 
 &nbsp;
