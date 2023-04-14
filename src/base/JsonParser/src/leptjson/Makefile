@@ -8,9 +8,11 @@ CC=gcc
 all : $(object)
 	gcc $(CFLAGS) $(object) -o test_out
 
+
 test.o:leptjson.h
 leptjson.o:leptjson.h
 
+
 .PHONY : clean
 clean :
-	rm -rf ./*.o out
+	rm -rf ./*.o test_out

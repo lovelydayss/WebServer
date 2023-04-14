@@ -14,6 +14,13 @@ typedef enum {
 	LEPT_OBJECT,
 } lept_type;
 
+typedef enum {
+	INSERT_OBJECT_OK,
+	MODIFY_OBJECT_OK,
+	REMOVE_OBJECT_OK,
+	OBJECT_INDEX_WRONG
+} lept_object_operate;
+
 /* 键值不存在 */
 #define LEPT_KEY_NOT_EXIST ((size_t)-1)
 
@@ -81,7 +88,7 @@ enum {
 int lept_parse(lept_value* v, const char* json);
 
 /* Json 生成函数 */
-void lept_stringify(const lept_value* v, char* s, size_t* length);
+char* lept_stringify(const lept_value* v, size_t* length);
 
 /* 拷贝，移动，交换 */
 void lept_copy(lept_value* dst, const lept_value* src);
@@ -113,10 +120,17 @@ void lept_set_number(lept_value* v, double n);
 const char* lept_get_string(const lept_value* v);
 size_t lept_get_string_length(const lept_value* v);
 
-void lept_set_string_copy(lept_value* v, const char* s, size_t len);
-void lept_set_string_move(lept_value* v, char* s, size_t len);
+void lept_set_string(lept_value* v, const char* s, size_t len);
 
 /* 数组 */
+/* 构造数组值 */
+/*
+void lept_set_array_copy(lept_value* v, const lept_value* e, size_t size,
+                         size_t capacity);
+void lept_set_array_move(lept_value* v, lept_value* e, size_t size,
+                         size_t capacity);
+*/
+void lept_set_array(lept_value* v, size_t capacity);
 
 /* 获取数组容量信息 */
 size_t lept_get_array_size(const lept_value* v);
@@ -137,13 +151,17 @@ void lept_insert_array_element(lept_value* v, const lept_value* e,
                                size_t index);
 void lept_erase_array_element(lept_value* v, size_t index, size_t count);
 
-/* 构造数组值 */
-void lept_set_array_copy(lept_value* v, const lept_value* e, size_t size,
-                         size_t capacity);
-void lept_set_array_move(lept_value* v, lept_value* e, size_t size,
-                         size_t capacity);
-
 /* Json 对象操作 */
+
+/* 构造 Json 对象 */
+/*
+void lept_set_object_copy(lept_value* v, const lept_member* s, size_t size,
+                          size_t capacity);
+void lept_set_object_move(lept_value* v, lept_member* s, size_t size,
+                          size_t capacity);
+*/
+void lept_set_object(lept_value* v, size_t capacity);
+
 /* 获取 Json 对象数组容量信息 */
 size_t lept_get_object_size(const lept_value* v);
 size_t lept_get_object_capacity(const lept_value* v);
@@ -164,25 +182,19 @@ const lept_value* lept_get_object_value_by_index(const lept_value* v,
 const lept_value* lept_get_object_value_by_key(const lept_value* v,
                                                const char* key, size_t klen);
 
-void lept_remove_object_value_by_index(lept_value* v, size_t index);
+int lept_remove_object_value_by_index(lept_value* v, size_t index);
 int lept_remove_object_value_by_key(lept_value* v, const char* key,
                                     size_t klen);
 
-int lept_set_object_value_copy(lept_value* v, const char* key, size_t klen,
-                               const lept_value* s_v);
-int lept_set_object_value_move(lept_value* v, const char* key, size_t klen,
-                               lept_value* s_v);
+int lept_set_object_value_by_index(lept_value* v, size_t index,
+                                   const lept_value* s_v);
+int lept_set_object_value_by_key(lept_value* v, const char* key, size_t klen,
+                                 const lept_value* s_v);
 
 /* find 查找 */
 size_t lept_find_object_index(const lept_value* v, const char* key,
                               size_t klen);
 const lept_value* lept_find_object_value(const lept_value* v, const char* key,
                                          size_t klen);
-
-/* 构造 Json 对象 */
-void lept_set_object_copy(lept_value* v, const lept_member* s, size_t size,
-                          size_t capacity);
-void lept_set_object_move(lept_value* v, lept_member* s, size_t size,
-                          size_t capacity);
 
 #endif /* LEPTJSON_H__ */

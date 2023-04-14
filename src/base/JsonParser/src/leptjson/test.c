@@ -82,7 +82,7 @@ static int test_pass = 0;
 		size_t length;                                      \
 		lept_value_init(&v);                                \
 		EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, json)); \
-		lept_stringify(&v, json2, &length);                 \
+		json2 = lept_stringify(&v, &length);                \
 		EXPECT_EQ_STRING(json, json2, length);              \
 		lept_free(&v);                                      \
 		free(json2);                                        \
@@ -542,6 +542,7 @@ static void test_equal() {
 	TEST_EQUAL("{}", "{}", 1);
 	TEST_EQUAL("{}", "null", 0);
 	TEST_EQUAL("{}", "[]", 0);
+
 	TEST_EQUAL("{\"a\":1,\"b\":2}", "{\"a\":1,\"b\":2}", 1);
 	TEST_EQUAL("{\"a\":1,\"b\":2}", "{\"b\":2,\"a\":1}", 1);
 	TEST_EQUAL("{\"a\":1,\"b\":2}", "{\"a\":1,\"b\":3}", 0);
@@ -582,8 +583,8 @@ static void test_swap() {
 	lept_value v1, v2;
 	lept_value_init(&v1);
 	lept_value_init(&v2);
-	lept_set_string_copy(&v1, "Hello", 5);
-	lept_set_string_copy(&v2, "World!", 6);
+	lept_set_string(&v1, "Hello", 5);
+	lept_set_string(&v2, "World!", 6);
 	lept_swap(&v1, &v2);
 	EXPECT_EQ_STRING("World!", lept_get_string(&v1),
 	                 lept_get_string_length(&v1));
@@ -596,7 +597,7 @@ static void test_swap() {
 static void test_access_null() {
 	lept_value v;
 	lept_value_init(&v);
-	lept_set_string_copy(&v, "a", 1);
+	lept_set_string(&v, "a", 1);
 	lept_set_null(&v);
 	EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
 	lept_free(&v);
@@ -605,7 +606,7 @@ static void test_access_null() {
 static void test_access_boolean() {
 	lept_value v;
 	lept_value_init(&v);
-	lept_set_string_copy(&v, "a", 1);
+	lept_set_string(&v, "a", 1);
 
 	lept_set_boolean(&v, 1);
 	EXPECT_EQ_INT(LEPT_TRUE, lept_get_type(&v));
@@ -625,7 +626,7 @@ static void test_access_boolean() {
 static void test_access_number() {
 	lept_value v;
 	lept_value_init(&v);
-	lept_set_string_copy(&v, "a", 1);
+	lept_set_string(&v, "a", 1);
 
 	lept_set_number(&v, (double)1234.66);
 	EXPECT_EQ_INT(LEPT_NUMBER, lept_get_type(&v));
@@ -641,9 +642,9 @@ static void test_access_number() {
 static void test_access_string() {
 	lept_value v;
 	lept_value_init(&v);
-	lept_set_string_copy(&v, "", 0);
+	lept_set_string(&v, "", 0);
 	EXPECT_EQ_STRING("", lept_get_string(&v), lept_get_string_length(&v));
-	lept_set_string_copy(&v, "Hello", 5);
+	lept_set_string(&v, "Hello", 5);
 	EXPECT_EQ_STRING("Hello", lept_get_string(&v), lept_get_string_length(&v));
 	lept_free(&v);
 }
@@ -654,8 +655,9 @@ static void test_access_array() {
 
 	lept_value_init(&a);
 
-	/* 由于 copy 系列函数会调用 move，故不再对 move 系列函数进行单独测试 */
-	/* set_array get_array_szie get_array_capacity ...*/
+/* 由于 copy 系列函数会调用 move，故不再对 move 系列函数进行单独测试 */
+/* set_array get_array_szie get_array_capacity ...*/
+#if 0
 	lept_value* tmp = (lept_value*)malloc(5 * sizeof(lept_value));
 	for (i = 0; i < 5; i++) {
 		lept_value_init(&e);
@@ -674,11 +676,16 @@ static void test_access_array() {
 	lept_reserve_array(&a, 20);
 	EXPECT_EQ_SIZE_T(20, lept_get_array_capacity(&a));
 	lept_free(&a);
-	lept_free(tmp);
+
+	for (i = 0; i < 5; i++)
+		lept_free(tmp + i);
+	free(tmp);
+
+#endif
 
 	/* push_back lept_set_array_move */
 	for (j = 0; j <= 5; j += 5) {
-		lept_set_array_move(&a, NULL, 0, j);
+		lept_set_array(&a, j);
 		EXPECT_EQ_SIZE_T(0, lept_get_array_size(&a));
 		EXPECT_EQ_SIZE_T(j, lept_get_array_capacity(&a));
 		for (i = 0; i < 10; i++) {
@@ -734,12 +741,14 @@ static void test_access_array() {
 		                 lept_get_number(lept_get_array_element(&a, i)));
 
 	EXPECT_TRUE(lept_get_array_capacity(&a) > 8);
-
+	lept_shrink_array(&a);
+	EXPECT_EQ_SIZE_T(8, lept_get_array_capacity(&a));
+	EXPECT_EQ_SIZE_T(8, lept_get_array_size(&a));
 	for (i = 0; i < 8; i++)
 		EXPECT_EQ_DOUBLE((double)i,
 		                 lept_get_number(lept_get_array_element(&a, i)));
 
-	lept_set_string_copy(&e, "Hello", 5);
+	lept_set_string(&e, "Hello", 5);
 	lept_pushback_array_element(&a, &e);
 	lept_free(&e);
 
@@ -763,8 +772,9 @@ static void test_access_object() {
 
 	lept_value_init(&o);
 
-	/* 由于 copy 系列函数会调用 move，故不再对 move 系列函数进行单独测试 */
-	/* set_object */
+/* 由于 copy 系列函数会调用 move，故不再对 move 系列函数进行单独测试 */
+/* set_object */
+#if 0
 	lept_member* tmp = (lept_member*)malloc(5 * sizeof(lept_member));
 
 	for (i = 0; i < 10; i++) {
@@ -773,9 +783,12 @@ static void test_access_object() {
 		lept_value_init(&v);
 		lept_set_number(&v, i);
 
-		(tmp + i)->klen = 2;
-		(tmp + i)->k = (char*)malloc(2);
-		memcpy((tmp + i), key, 2);
+		size_t klen = 1;
+		(tmp + i)->k = (char*)malloc(klen + 1);
+		memcpy((tmp + i)->k, key, klen);
+		(tmp + i)->k[klen] = '\0';
+
+		(tmp + i)->klen = klen;
 		lept_copy(&tmp->v, &v);
 
 		lept_free(&v);
@@ -795,14 +808,20 @@ static void test_access_object() {
 
 	/* 释放 tmp */
 	for (i = 0; i < 5; i++) {
-		lept_free(&tmp->v);
-		free(tmp->k);
+		lept_free(&((tmp + i)->v));
+		free((tmp + i)->k);
 	}
 	free(tmp);
 
+#endif
+
 	/* set_object_value set_object_move */
+	/* 此处 j 可以为任何值，但是为 5 的话会产生 realloc(): invalid next size 的
+	 * segment fault */
+
 	for (j = 0; j <= 5; j += 5) {
-		lept_set_object_move(&o, NULL, 0, j);
+
+		lept_set_object(&o, j);
 		EXPECT_EQ_SIZE_T(0, lept_get_object_size(&o));
 		EXPECT_EQ_SIZE_T(j, lept_get_object_capacity(&o));
 
@@ -811,7 +830,7 @@ static void test_access_object() {
 			key[0] += i;
 			lept_value_init(&v);
 			lept_set_number(&v, i);
-			lept_set_object_value_copy(&o, key, 1, &v);
+			lept_set_object_value_by_key(&o, key, 1, &v);
 
 			lept_free(&v);
 		}
@@ -827,6 +846,7 @@ static void test_access_object() {
 		}
 	}
 
+	/* find */
 	index = lept_find_object_index(&o, "j", 1);
 	EXPECT_TRUE(index != LEPT_KEY_NOT_EXIST);
 	lept_remove_object_value_by_index(&o, index);
@@ -853,19 +873,19 @@ static void test_access_object() {
 		                     &o, lept_find_object_index(&o, key, 1))));
 	}
 
-	lept_set_string_copy(&v, "Hello", 5);
-	lept_set_object_value_copy(&o, "World", 5, &v);
+	lept_set_string(&v, "Hello", 5);
+	lept_set_object_value_by_key(&o, "World", 5, &v);
 	lept_free(&v);
 
 	pv = lept_find_object_value(&o, "World", 5);
 	EXPECT_TRUE(pv != NULL);
 	EXPECT_EQ_STRING("Hello", lept_get_string(pv), lept_get_string_length(pv));
 
-	i = lept_get_object_capacity(&o);
+	lept_get_object_capacity(&o);
 	lept_clear_object(&o);
 	EXPECT_EQ_SIZE_T(0, lept_get_object_size(&o));
-	EXPECT_EQ_SIZE_T(
-	    i, lept_get_object_capacity(&o)); /* capacity remains unchanged */
+	/* 删除值时会调整 capacity ，清空时其大小应为 0 * 2 + 1 = 1 */
+	EXPECT_EQ_SIZE_T(1, lept_get_object_capacity(&o));
 	lept_shrink_object(&o);
 	EXPECT_EQ_SIZE_T(0, lept_get_object_capacity(&o));
 
