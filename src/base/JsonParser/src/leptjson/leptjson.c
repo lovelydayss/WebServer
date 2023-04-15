@@ -181,7 +181,10 @@ void lept_copy(lept_value* dst, const lept_value* src) {
 			lept_set_object_value_by_key(dst, src->u.o.m[i].k,
 			                             src->u.o.m[i].klen, val);
 
+			/* lept_free 只进行了内部空间的释放 */
 			lept_free(val);
+			free(val);
+			val = NULL;
 		}
 		break;
 	default:
@@ -213,19 +216,26 @@ void lept_free(lept_value* v) {
 	/* string 处理 */
 	case LEPT_STRING:
 		free(v->u.s.s);
+		v->u.s.s = NULL;
 		break;
 	/* array 处理 */
 	case LEPT_ARRAY:
-		for (i = 0; i < v->u.a.size; i++)
+		for (i = 0; i < v->u.a.capacity; i++)
 			lept_free(&v->u.a.e[i]);
+
 		free(v->u.a.e);
+		v->u.a.e = NULL;
 		break;
 	case LEPT_OBJECT:
-		for (i = 0; i < v->u.o.size; i++) {
+		for (i = 0; i < v->u.o.capacity; i++) {
 			free(v->u.o.m[i].k);
+			v->u.o.m[i].k = NULL;
+
 			lept_free(&v->u.o.m[i].v);
 		}
+
 		free(v->u.o.m);
+		v->u.o.m = NULL;
 		break;
 	default:
 		break;
@@ -518,19 +528,20 @@ int lept_remove_object_value_by_index(lept_value* v, size_t index) {
 	if (index >= v->u.o.size)
 		return OBJECT_INDEX_WRONG;
 
-	size_t i;
-	for (i = index; i < v->u.o.size; i++) {
-		memcpy(v->u.o.m + i, v->u.o.m + i + 1, sizeof(lept_member));
-	}
-
 	v->u.o.size--;
-
 	size_t new_capacity = 2 * v->u.o.size + 1;
+
 	/* 调整容量值 */
 	if (new_capacity < v->u.o.capacity) {
 		v->u.o.capacity = new_capacity;
 		v->u.o.m =
 		    (lept_member*)realloc(v->u.o.m, new_capacity * sizeof(lept_member));
+	}
+
+	/* 移动各元素值 */
+	size_t i;
+	for (i = index; i < v->u.o.size; i++) {
+		memcpy(v->u.o.m + i, v->u.o.m + i + 1, sizeof(lept_member));
 	}
 
 	return REMOVE_OBJECT_OK;
@@ -568,12 +579,16 @@ int lept_set_object_value_by_key(lept_value* v, const char* key, size_t klen,
 
 		/* member 类型的复制 */
 
-		((v->u.o.m) + v->u.o.size)->k = (char*)malloc(klen + 1);
-		memcpy(((v->u.o.m) + v->u.o.size)->k, key, klen);
-		((v->u.o.m) + v->u.o.size)->k[klen] = '\0';
+		lept_member* ptr = (v->u.o.m) + v->u.o.size;
 
-		((v->u.o.m) + v->u.o.size)->klen = klen;
-		lept_copy(&((v->u.o.m) + v->u.o.size)->v, s_v);
+		/* free(ptr->k); */
+		ptr->k = (char*)malloc(klen + 1);
+
+		memcpy(ptr->k, key, klen);
+		ptr->k[klen] = '\0';
+
+		ptr->klen = klen;
+		lept_copy(&(ptr->v), s_v);
 		v->u.a.size++;
 
 		return INSERT_OBJECT_OK;
@@ -935,7 +950,11 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
 		ret = lept_parse_string_raw(c, &str, &m.klen);
 		if (ret != LEPT_PARSE_OK)
 			break;
-		memcpy(m.k = (char*)malloc(m.klen + 1), str, m.klen);
+
+		/* free(m.k); */
+		m.k = (char*)malloc(m.klen + 1);
+
+		memcpy(m.k, str, m.klen);
 		m.k[m.klen] = '\0';
 
 		/* 解析中间 : */
@@ -976,9 +995,12 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
 	}
 	/* Pop and free members on the stack */
 	free(m.k);
+	m.k = NULL;
 	for (i = 0; i < size; i++) {
 		lept_member* m = (lept_member*)lept_context_pop(c, sizeof(lept_member));
 		free(m->k);
+		m->k = NULL;
+
 		lept_free(&m->v);
 	}
 	v->type = LEPT_NULL;

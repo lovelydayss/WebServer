@@ -1,19 +1,4 @@
-# Milo Yip 《从零开始的 JSON 库教程》整理与思考
-
-## 文档
-
-### Json 语法
-
-
-### 接口设计
-
-### 测试
-
-segment fault
-
-### 使用示例
-
-## Miloyip 大神教程整理与思考
+## Miloyip 教程整理与扩展
 
 ### tutorial 3
 

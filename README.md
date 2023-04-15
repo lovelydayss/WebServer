@@ -8,9 +8,18 @@ a simple webserver program for C++ backend and Audio ...
 
 ## 学习之路
 
-| 博客/文档名称  | 简要描述                                                                                          |    完成情况    |      位置链接      |
-| -------------- | ------------------------------------------------------------------------------------------------- | :-------------: | :----------------: |
-| WebServer 0.01 | 对于游双《Linux 高性能服务器编程》书籍的阅读总结，包括对于其最后示例即项目 WebServer 0.01 的整理 | To be completed | WebServer 0.01/doc |
+### 文档
+
+|              文档名称              | 简要描述                                                                                          |    完成情况    |            位置链接            |
+| :---------------------------------: | ------------------------------------------------------------------------------------------------- | :-------------: | :-----------------------------: |
+|         WebServer 0.01 文档         | 对于游双《Linux 高性能服务器编程》书籍的阅读总结，包括对于其最后示例即项目 WebServer 0.01 的整理 | To be completed |       WebServer 0.01/doc       |
+| Doc of My Json library ( leptjson ) | 参考 Milo Yip 《从零开始的 JSON 库教程》实现 Json 库的文档，包含支持语法，接口定义，测试报告等    |    Complete    | base/JsonParser/doc/leptjson.md |
+
+### 博客
+
+|        博客名称        | 简要描述                                                                           |    完成情况    |               位置链接               |
+| :---------------------: | ---------------------------------------------------------------------------------- | :-------------: | :----------------------------------: |
+| Milo Yip 教程整理与扩展 | 参考 Milo Yip 《从零开始的 JSON 库教程》各 tutorial 整理、相关知识扩展、思考总结等 | To be completed | base/JsonParser/doc/tutorials.md   |
 
 &nbsp;
 
@@ -20,8 +29,8 @@ a simple webserver program for C++ backend and Audio ...
 
 |      名称      | 介绍                                                                         |        位置        |     完成情况     |      测试      |                       仓库位置                       |
 | :------------: | ---------------------------------------------------------------------------- | :-----------------: | :---------------: | :-------------: | :--------------------------------------------------: |
-|   ThreadPool   | A high performance thread pool                                               |   base/ThreadPool   |     Completed     | To be completed | [ThreadPool](https://github.com/lovelydayss/ThreadPool) |
-|   JsonParser   | A JSON parser implemented using a regular matching method                    |   base/JsonParser   | Under development |    Completed    |                       not yet                       |
+|   ThreadPool   | A high performance thread pool                                               |   base/ThreadPool   |     Complete     | To be completed | [ThreadPool](https://github.com/lovelydayss/ThreadPool) |
+|   JsonParser   | A JSON parser implemented using a regular matching method                    |   base/JsonParser   | Under development | To be completed |                       not yet                       |
 | ConnectionPool | A connection pool that supports Redis and MySQL                              | base/ConnectionPool |  To be completed  | To be completed |                       not yet                       |
 |      Net      | A network framework library implemented using the remaining basic components |       ......       |  To be completed  | To be completed |                       not yet                       |
 
