@@ -104,7 +104,7 @@ object = begin-object [ member *( value-separator member ) ] end-object
 
 ### 基本操作思路
 
-![](https://github.com/lovelydayss/WebServer/blob/master/src/base/JsonParser/doc/image/requirement.png)
+![](images/requirement.png)
 
 ### 接口描述
 
