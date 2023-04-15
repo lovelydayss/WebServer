@@ -10,16 +10,16 @@ a simple webserver program for C++ backend and Audio ...
 
 ### 文档
 
-|              文档名称              | 简要描述                                                                                          |    完成情况    |            位置链接            |
-| :---------------------------------: | ------------------------------------------------------------------------------------------------- | :-------------: | :-----------------------------: |
-|         WebServer 0.01 文档         | 对于游双《Linux 高性能服务器编程》书籍的阅读总结，包括对于其最后示例即项目 WebServer 0.01 的整理 | To be completed |       WebServer 0.01/doc       |
-| Doc of My Json library ( leptjson ) | 参考 Milo Yip 《从零开始的 JSON 库教程》实现 Json 库的文档，包含支持语法，接口定义，测试报告等    |    Complete    | base/JsonParser/doc/leptjson.md |
+|              文档名称              | 简要描述                                                                                          |    完成情况    |                                                         位置链接                                                         |
+| :---------------------------------: | ------------------------------------------------------------------------------------------------- | :-------------: | :----------------------------------------------------------------------------------------------------------------------: |
+|         WebServer 0.01 文档         | 对于游双《Linux 高性能服务器编程》书籍的阅读总结，包括对于其最后示例即项目 WebServer 0.01 的整理 | To be completed |                                                    WebServer 0.01/doc                                                    |
+| Doc of My Json library ( leptjson ) | 参考 Milo Yip 《从零开始的 JSON 库教程》实现 Json 库的文档，包含支持语法，接口定义，测试报告等    |    Complete    | [base/JsonParser/doc/leptjson.md](https://github.com/lovelydayss/WebServer/blob/master/src/base/JsonParser/doc/leptjson.md) |
 
 ### 博客
 
-|        博客名称        | 简要描述                                                                           |    完成情况    |               位置链接               |
-| :---------------------: | ---------------------------------------------------------------------------------- | :-------------: | :----------------------------------: |
-| Milo Yip 教程整理与扩展 | 参考 Milo Yip 《从零开始的 JSON 库教程》各 tutorial 整理、相关知识扩展、思考总结等 | To be completed | base/JsonParser/doc/tutorials.md   |
+|        博客名称        | 简要描述                                                                        |    完成情况    |             位置链接             |
+| :---------------------: | ------------------------------------------------------------------------------- | :-------------: | :------------------------------: |
+| Milo Yip 教程整理与扩展 |  Milo Yip 《从零开始的 JSON 库教程》各 tutorial 整理、相关知识扩展、思考总结等 | To be completed | base/JsonParser/doc/tutorials.md |
 
 &nbsp;
 
@@ -60,5 +60,7 @@ a simple webserver program for C++ backend and Audio ...
 **2023-4-10** 更新，开始写 miloyip 大佬的《从零开始的 JSON 库教程》，写完了前两个 tutorial，即 JsonParser 的 null，true，false，number 等类型解析。之后几天的更新也将会集中在JsonParser 库的实现上 [git-commit](https://github.com/lovelydayss/WebServer/commit/c9c64d7d9ac5a154769f6c22279f8295aec79f58)
 
 **2023-4-14** 更新，完成《从零开始的 JSON 库教程》的全部 tutorial（包括教程中未实现的 tutorial8 及其扩展），并跑通所有测试用例。下一步将进行文档的整理，整理完成后将进行满足  nlohmann Json 接口规范的 moedrn C++ Json 解析器实现。 [git-commit](https://github.com/lovelydayss/WebServer/commit/ea3ec4e560c0c118842196876bcbdacefdb56253)
+
+**2023-4-15** 更新，完成 My leptjson 文档的整理，使用 Valgrind 工具进行内存测试，修正部分内存问题。参考 Milo Yip《从零开始的 JSON 库教程》实现 Json 库的开发告一段落，接下来将补齐对于该教程的扩展整理（即博客 Milo Yip 教程整理与扩展） [git-commit](https://github.com/lovelydayss/WebServer/commit/96c7f8de39b2466ecb5b95dbec12b2310e7a0438)
 
 &nbsp;

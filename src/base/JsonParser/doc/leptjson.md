@@ -1,14 +1,14 @@
-## Doc of My Json library ( leptjson )
+# Doc of My Json library ( leptjson )
 
-### Json 语法
+## Json 语法
 
-#### 简介
+### 简介
 
 仅支持标准  `Json` 语法 [RFC7159](https://tools.ietf.org/html/rfc7159)
 
 仅支持 `utf-8` 编码 [UNICODE](http://www.unicode.org/versions/latest/)
 
-#### [ABNF](https://tools.ietf.org/html/rfc5234) 描述
+### [ABNF](https://tools.ietf.org/html/rfc5234) 描述
 
 ```
 /* value */
@@ -92,9 +92,9 @@ object = begin-object [ member *( value-separator member ) ] end-object
 	end-object      = ws %x7D ws  ; } right curly bracket
 ```
 
-### 接口设计
+## 接口设计
 
-#### 设计简介
+### 设计简介
 
 接口设计方面基本参照了 `Milo Yip` 原教程中的接口定义，也进行了一定修改。
 
@@ -102,11 +102,11 @@ object = begin-object [ member *( value-separator member ) ] end-object
 2. 出于安全性考虑，此项目中采用 `const` 语法对 `get` 类型的获取对象函数返回值以及各函数中不需要修改的输入值进行修饰，以确保不产生意外的数据修改问题。
 3. 出于调用一致性考虑，对 Json 对象的部分操作接口函数进行了封装和重构。
 
-#### 接口描述
+### 接口描述
 
 此处将对该 Json 库的主要操作接口进行描述
 
-##### Json 树形结构定义
+#### Json 树形结构定义
 
 ```c
 /* Json value */
@@ -141,7 +141,7 @@ struct lept_member {
 };
 ```
 
-##### Json 基本操作
+#### Json 基本操作
 
 ```c
 /* Json parse */
@@ -165,15 +165,15 @@ lept_type lept_get_type(const lept_value* v);
 int lept_is_equal(const lept_value* lhs, const lept_value* rhs);
 ```
 
-##### Json 值操作
+#### Json 值操作
 
-###### null
+##### null
 
 ```c
 #define lept_set_null(v) lept_free(v)
 ```
 
-###### false & true
+##### false & true
 
 ```c
 /* init and modify */
@@ -183,7 +183,7 @@ void lept_set_boolean(lept_value* v, int b);
 int lept_get_boolean(const lept_value* v);
 ```
 
-###### number
+##### number
 
 ```c
 /* init and modify */
@@ -193,7 +193,7 @@ void lept_set_number(lept_value* v, double n);
 double lept_get_number(const lept_value* v);
 ```
 
-###### string
+##### string
 
 ```c
 /* init and modify */
@@ -204,7 +204,7 @@ const char* lept_get_string(const lept_value* v);
 size_t lept_get_string_length(const lept_value* v);
 ```
 
-###### array
+##### array
 
 ```c
 /* init */
@@ -227,7 +227,7 @@ void lept_insert_array_element(lept_value* v, const lept_value* e, size_t index)
 void lept_erase_array_element(lept_value* v, size_t index, size_t count);
 ```
 
-###### object
+##### object
 
 ```c
 /* init */
@@ -266,9 +266,9 @@ size_t lept_find_object_index(const lept_value* v, const char* key, size_t klen)
 const lept_value* lept_find_object_value(const lept_value* v, const char* key, size_t klen);
 ```
 
-### 测试
+## 测试
 
-#### 测试用例
+### 测试用例
 
 教程中设计测试用例全部通过，未对测试用例进行进一步扩展
 
@@ -276,7 +276,7 @@ const lept_value* lept_find_object_value(const lept_value* v, const char* key, s
 
 在后续 `mJson` 项目中将会考虑进一步使用 `gcov` 等工具进行覆盖率测试
 
-#### Valgrind 测试
+### Valgrind 测试
 
 `valgrind` 测试中主要存在以下问题，因为对于 C 语言的字符串及空间分配等问题理解有限，部分问题未能解决
 
@@ -380,7 +380,7 @@ ptr->k = (char*)malloc(klen + 1);
 
 `total heap usage: 496 allocs, 483 frees, 46,554 bytes allocated`
 
-### 使用示例
+## 使用示例
 
 ```c
 /* ......  */
