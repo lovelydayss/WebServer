@@ -1,4 +1,4 @@
-# Doc of My Json library ( leptjson )
+# Doc of My Json library (leptjson)
 
 ## Json 语法
 
@@ -102,6 +102,10 @@ object = begin-object [ member *( value-separator member ) ] end-object
 2. 出于安全性考虑，此项目中采用 `const` 语法对 `get` 类型的获取对象函数返回值以及各函数中不需要修改的输入值进行修饰，以确保不产生意外的数据修改问题。
 3. 出于调用一致性考虑，对 Json 对象的部分操作接口函数进行了封装和重构。
 
+### 基本操作思路
+
+![img](https://vscode-remote+ssh-002dremote-002bubuntu.vscode-resource.vscode-cdn.net/home/lovelydayss/Code/webserver/src/base/JsonParser/doc/image/requirement.png)
+
 ### 接口描述
 
 此处将对该 Json 库的主要操作接口进行描述
@@ -136,7 +140,7 @@ struct lept_value {
 /* Json member */
 struct lept_member {
 	char k;
-	size_t klen;  / key string*/
+	size_t klen;  /* key string */
 	lept_value v; /* value */
 };
 ```
