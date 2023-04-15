@@ -104,7 +104,7 @@ object = begin-object [ member *( value-separator member ) ] end-object
 
 ### 基本操作思路
 
-![img](https://vscode-remote+ssh-002dremote-002bubuntu.vscode-resource.vscode-cdn.net/home/lovelydayss/Code/webserver/src/base/JsonParser/doc/image/requirement.png)
+![](./image/requirement.png)
 
 ### 接口描述
 
