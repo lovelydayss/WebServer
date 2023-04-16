@@ -85,8 +85,7 @@ static int test_pass = 0;
 		json2 = lept_stringify(&v, &length);                \
 		EXPECT_EQ_STRING(json, json2, length);              \
 		lept_free(&v);                                      \
-		free(json2);                                        \
-		json2 = NULL;                                       \
+		free_ptr(json2);                                    \
 	} while (0)
 /* Json 相等判断测试用例扩展宏 */
 #define TEST_EQUAL(json1, json2, equality)                    \

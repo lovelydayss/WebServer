@@ -5,7 +5,7 @@
 
 /* Json 数值类型 */
 typedef enum {
-	LEPT_NULL,
+	LEPT_NULL = 1,
 	LEPT_FALSE,
 	LEPT_TRUE,
 	LEPT_NUMBER,
@@ -59,12 +59,20 @@ struct lept_member {
 	lept_value v; /* value */
 };
 
+/* 指针释放 */
+#define free_ptr(p)      \
+	do {                 \
+		if (p != NULL) { \
+			free(p);     \
+			p = NULL;    \
+		}                \
+	} while (0)
+
 /* Json value 值类型初始化 */
 #define lept_value_init(v)     \
 	do {                       \
 		(v)->type = LEPT_NULL; \
 	} while (0)
-
 
 /* Json 解析返回类型 */
 enum {
