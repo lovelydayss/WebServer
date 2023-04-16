@@ -452,7 +452,7 @@ static void test_access_object(){
 		/* ...... */
 
 	}
-	
+
 	/* ...... */
 
 }
@@ -464,7 +464,7 @@ static void test_access_object(){
 
 ```c
 void lept_copy(lept_value* dst, const lept_value* src) {
-	
+
 	/* ...... */
 
 	for (i = 0; i < src->u.o.size; i++) {
@@ -479,7 +479,7 @@ void lept_copy(lept_value* dst, const lept_value* src) {
 		/* lept_free 只进行了内部空间的释放 */
 		lept_free(val);				/* add */
 		free(val);				/* add */
-	}	
+	}
 
 	/* ...... */
 

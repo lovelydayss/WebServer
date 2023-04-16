@@ -155,22 +155,32 @@ JSON 数组存储零至多个元素，最简单就是使用 C 语言的数组。
 
 ## tutorial 7
 
-Json 生成器
+### 生成器简介
+
+生成器（generator）负责与解析器相反的事情，就是把树形数据结构转换成 JSON 文本。这个过程也被称为「字符串化（stringify）」。
+
+相对于解析器，通常生成器更容易实现，而且生成器几乎不会造成运行时错误。因此，生成器的 API 设计为以下形式，直接返回 JSON 的字符串：
+
+```c
+char* lept_stringify(const lept_value* v, size_t* length);
+```
+
+`length` 参数是可选的，它会存储 JSON 的长度，传入 `NULL` 可忽略此参数。使用方需负责用 `free()` 释放内存。
+
+为了简单起见，我们不做换行、缩进等美化（prettify）处理，因此它生成的 JSON 会是单行、无空白字符的最紧凑形式。
+
+#### 生成与解析器关系描述
+
+![](images/parse_stringify.png)
+
+> 除了最简单的生成器功能，有一些 JSON 库还会提供一些美化功能，即加入缩进及换行。另外，有一些应用可能需要大量输出数字，那么就需要优化数字的输出。这方面可考虑 C++ 开源库 **[double-conversion](https://github.com/google/double-conversion)**，以及[RapidJSON 代码剖析（四）：优化 Grisu](https://zhuanlan.zhihu.com/p/20092285)
 
 ## tutorial 8
 
-这里好像大佬没有更新
+> 从这里开始 Milo Yip 大佬停止了更新
 
-看了看大佬在 tutorial 中提供的一系列接口函数
+在大佬提供的一系列接口函数的基础上，我对部分接口进行了修改，并完成了 Json 库的最后实现。这部分在 **[my leptjson 项目文档](leptjson.md)** 进行了详细描述，此处不再赘述。
 
-感觉就一片混乱
-
-于是我就斗胆修改了下接口定义，并按照我的思路进行了实现
-
-因为最后会使用 modern C++ 语言去实现一个 mJson 的 Json解析器，本项目仅用于对Json 解析思路进行理解，故最后未继续进行优化尝试
-
-此外简单编写了部分测试用例
+因为之后会再使用 modern C++ 语法去实现一个名为 mJson 的 Json 解析器，而本项目仅用于加深对于 Json 解析思路的理解，故再开发完成后仅进行了自带的 560 例测试用例的测试和 Valgrind 检测出内存问题的修复，未继续进行优化方面的尝试。
 
 ## 感悟与收获
-
-aFASDGDFASHGBFS
