@@ -103,7 +103,7 @@ object = begin-object [ member *( value-separator member ) ] end-object
 
 ## 接口设计
 
-#### 设计简介
+### 设计简介
 
 接口设计方面基本参照了 `Milo Yip` 原教程中的接口定义，也进行了一定修改。
 
@@ -111,7 +111,7 @@ object = begin-object [ member *( value-separator member ) ] end-object
 2. 出于安全性考虑，此项目中采用 `const` 语法对 `get` 类型的获取对象函数返回值以及各函数中不需要修改的输入值进行修饰，以确保不产生意外的数据修改问题。
 3. 出于调用一致性考虑，对 Json 对象的部分操作接口函数进行了封装和重构。
 
-#### 基本操作思路
+### 基本操作思路
 
 ![](images/requirement.png)
 

@@ -21,8 +21,6 @@ a simple webserver program for C++ backend and Audio ...
 | :---------------------: | ----------------------------------------------------------------------------- | :-------------: | :--------------------------------------------------------: |
 | Milo Yip 教程整理与扩展 | Milo Yip 《从零开始的 JSON 库教程》各 tutorial 整理、相关知识扩展、思考总结等 |    Complete    | [tutorials.md](src/base/JsonParser/doc/leptjson/tutorials.md) |
 |        字符编码        | 常用字符编码规范及 C++字符编码库整理                                          | To be completed |                        character.md                        |
-|                        |                                                                               |                |                                                            |
-|                        |                                                                               |                |                                                            |
 
 &nbsp;
 
