@@ -571,7 +571,7 @@ void lept_erase_array_element(lept_value* v, size_t index, size_t count) {
 
 #### 最终程序 Valgrind 测试报告
 
-![](images/Valgrind.png)
+![](images/valgrind.png)
 
 ## 使用示例
 
