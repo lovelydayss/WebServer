@@ -20,7 +20,7 @@ a simple webserver program for C++ backend and Audio ...
 |        博客名称        | 简要描述                                                                      |    完成情况    |                          位置链接                          |
 | :---------------------: | ----------------------------------------------------------------------------- | :-------------: | :--------------------------------------------------------: |
 | Milo Yip 教程整理与扩展 | Milo Yip 《从零开始的 JSON 库教程》各 tutorial 整理、相关知识扩展、思考总结等 |    Complete    | [tutorials.md](src/base/JsonParser/leptjson/doc/tutorials.md) |
-|        字符编码        | 常用字符编码规范及 C++字符编码库整理                                          | To be completed |                        character.md                        |
+|   字符编码与 C++ 处理   | 常用字符集、字符编码规范及 C++字符编码支持整理                                | To be completed |             [unicode.md](mind/Unicode/unicode.md)             |
 
 &nbsp;
 
@@ -31,7 +31,7 @@ a simple webserver program for C++ backend and Audio ...
 |      名称      | 介绍                                                                         |        位置        |     完成情况     |       测试       |                       仓库位置                       |
 | :------------: | ---------------------------------------------------------------------------- | :-----------------: | :---------------: | :---------------: | :--------------------------------------------------: |
 |   ThreadPool   | A high performance thread pool                                               |   base/ThreadPool   |     Complete     |  To be completed  | [ThreadPool](https://github.com/lovelydayss/ThreadPool) |
-|   JsonParser   | A JSON parser implemented using a regular matching method                    |   base/JsonParser   | Under development | Under development |                       not yet                       |
+|   JsonParser   | A moden C++ style Json parser                                              |   base/JsonParser   | Under development | Under development |                       not yet                       |
 | ConnectionPool | A connection pool that supports Redis and MySQL                              | base/ConnectionPool |  To be completed  |  To be completed  |                       not yet                       |
 |      Net      | A network framework library implemented using the remaining basic components |       ......       |  To be completed  |  To be completed  |                       not yet                       |
 
