@@ -1,4 +1,4 @@
-#include "leptjson.h"
+#include "../src/leptjson.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
