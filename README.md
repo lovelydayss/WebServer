@@ -17,10 +17,10 @@ a simple webserver program for C++ backend and Audio ...
 
 ### 博客
 
-|        博客名称        | 简要描述                                                                      |    完成情况    |                          位置链接                          |
-| :---------------------: | ----------------------------------------------------------------------------- | :-------------: | :--------------------------------------------------------: |
-| Milo Yip 教程整理与扩展 | Milo Yip 《从零开始的 JSON 库教程》各 tutorial 整理、相关知识扩展、思考总结等 |    Complete    | [tutorials.md](src/base/JsonParser/leptjson/doc/tutorials.md) |
-|   字符编码与 C++ 处理   | 常用字符集、字符编码规范及 C++字符编码支持整理                                | To be completed |             [unicode.md](mind/Unicode/unicode.md)             |
+|        博客名称        | 简要描述                                                                      | 完成情况 |                          位置链接                          |
+| :---------------------: | ----------------------------------------------------------------------------- | :------: | :--------------------------------------------------------: |
+| Milo Yip 教程整理与扩展 | Milo Yip 《从零开始的 JSON 库教程》各 tutorial 整理、相关知识扩展、思考总结等 | Complete | [tutorials.md](src/base/JsonParser/leptjson/doc/tutorials.md) |
+|   字符编码与 C++ 处理   | 常用字符集、字符编码规范及 C++字符编码支持整理                                | Complete |        [unicode.md](mind/character-coding/unicode.md)        |
 
 &nbsp;
 
