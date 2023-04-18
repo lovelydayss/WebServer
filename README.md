@@ -68,4 +68,6 @@ a simple webserver program for C++ backend and Audio ...
 
 **2023-4-16** 更新，重构部分代码，修正全部内存问题。完成教程的扩展整理（即博客 Milo Yip 教程整理与扩展），接下来将进行 mJson （即满足  nlohmann Json 接口规范的 modern C++ Json 库）的开发 [git-commit](https://github.com/lovelydayss/WebServer/commit/a6c4489eb93bc526537774b0650c019491e00535)
 
+**2023-4-18** 更新，完成 mJson 库的接口定义（未考虑各部分间关系，暂时设计为单个 Json 类，部分成员函数使用模板方法实现），此外添加 mLog 库至待完成计划。 [git-commit](https://github.com/lovelydayss/WebServer/commit/fd1e8367d45cf74833cdd104cb8b9e7cbbe8b640)
+
 &nbsp;
