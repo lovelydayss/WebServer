@@ -1,31 +1,27 @@
-## mJson
+# Document of mJson
 
-### 简介
+## 简介
 
-A modern C++ Json Parser using C++11
+mJson is a modern C++ Json Parser using C++11
 
-此项目在前置项目基础上采用 C++11 语法重写
+## 外部依赖库及相关工具
 
-此外参考大佬提供的部分思路
+### 项目依赖
 
-### 前置项目
+* C++ 标准模板库 （STL）
 
-miloyip 大佬的 《从零开始的 JSON 库教程》
+### 测试工具
 
-即此文件夹路径下的 leptjson
+* 测试框架 doctest
+* 覆盖率测试工具 gcov + lcov
+* 内存检测工具 valgrind
 
-### 依赖项
+## 接口设计
 
-C++ 标准模板库 （STL）
 
-### 接口设计
 
-参考 nlohmann 接口设计
+## 设计思路
 
-### 设计思路
 
-### 测试与比较
 
-### 引用与参考
-
-### 更新记录
+## 测试与比较
