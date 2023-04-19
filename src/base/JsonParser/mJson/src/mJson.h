@@ -20,8 +20,8 @@ enum class value_type : std::uint8_t {
 	NUMBER_INTEGER,  ///< number value (signed integer)
 	NUMBER_UNSIGNED, ///< number value (unsigned integer)
 	NUMBER_FLOAT,    ///< number value (floating-point)
-	// BINARY,          ///< binary array (ordered collection of bytes)
-	// DISCARDED        ///< discarded by the parser callback function
+	// BINARY,     	 ///< binary array (ordered collection of bytes)
+	// DISCARDED     ///< discarded by the parser callback function
 };
 
 static std::vector<std::string> valueTypeString = {
@@ -62,19 +62,26 @@ enum class error_type : std::uint8_t {
 };
 
 static std::vector<std::string> errorTypeString = {
-    "LEPT_PARSE_OK", "LEPT_PARSE_EXPECT_VALUE", "LEPT_PARSE_INVALID_VALUE",
+    "LEPT_PARSE_OK",
+    "LEPT_PARSE_EXPECT_VALUE",
+    "LEPT_PARSE_INVALID_VALUE",
     "LEPT_PARSE_ROOT_NOT_SINGULAR",
     "LEPT_PARSE_NUMBER_TOO_BIG",
-    "LEPT_PARSE_MISS_QUOTATION_MARK", "LEPT_PARSE_INVALID_STRING_ESCAPE",
-    "LEPT_PARSE_INVALID_STRING_CHAR", "LEPT_PARSE_INVALID_UNICODE_HEX",
+    "LEPT_PARSE_MISS_QUOTATION_MARK",
+    "LEPT_PARSE_INVALID_STRING_ESCAPE",
+    "LEPT_PARSE_INVALID_STRING_CHAR",
+    "LEPT_PARSE_INVALID_UNICODE_HEX",
     "LEPT_PARSE_INVALID_UNICODE_SURROGATE",
-    "LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET", "LEPT_PARSE_MISS_KEY",
-    "LEPT_PARSE_MISS_COLON", "LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET",
+    "LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET",
+    "LEPT_PARSE_MISS_KEY",
+    "LEPT_PARSE_MISS_COLON",
+    "LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET",
 
-    "INSERT_OBJECT_OK", "MODIFY_OBJECT_OK", "REMOVE_OBJECT_OK",
+    "INSERT_OBJECT_OK",
+    "MODIFY_OBJECT_OK",
+    "REMOVE_OBJECT_OK",
     "OBJECT_INDEX_WRONG",
-    "LEPT_KEY_NOT_EXIST"
-};
+    "LEPT_KEY_NOT_EXIST"};
 
 class json;
 using jsonPtr = std::unique_ptr<json>;
@@ -91,8 +98,8 @@ class const_iterator;
 
 ///< typedef
 using value_t = value_type;
-using object_t = std::map<std::string, json>;
-using array_t = std::vector<json>;
+using object_t = std::map<std::string, jsonPtr>;
+using array_t = std::vector<jsonPtr>;
 using string_t = std::string;
 using boolean_t = bool;
 using number_float_t = double;
@@ -119,10 +126,11 @@ public:
 	template <typename JsonValueType>
 	json(const JsonValueType& val);
 
-	template<typename JsonValueType>
+	template <typename JsonValueType>
 	json(const string_t&, const JsonValueType& val);
 
-	json(initializer_list_t init, bool typeDeduction = true,
+	json(initializer_list_t init,
+	     bool typeDeduction = true,
 	     value_t manualType = value_t::ARRAY);
 
 	json(size_t cnt, jsonConstRef val);
@@ -163,9 +171,9 @@ public:
 	jsonRef at(jsonConstPtr& ptr);
 	jsonConstRef at(jsonConstPtr& ptr) const;
 
-	template<typename KeyType>
+	template <typename KeyType>
 	jsonRef at(KeyType&& key);
-	template<typename KeyType>
+	template <typename KeyType>
 	jsonConstRef at(KeyType&& key) const;
 
 	///< accept
@@ -173,7 +181,8 @@ public:
 	static bool accept(InputType&& i, const bool ignoreComments = false);
 
 	template <typename IteratorType>
-	static bool accept(IteratorType first, IteratorType last,
+	static bool accept(IteratorType first,
+	                   IteratorType last,
 	                   const bool ignoreComments = false);
 
 	///< front
@@ -198,9 +207,9 @@ public:
 	iterator find(const object_key_t& key);
 	const_iterator find(const object_key_t& key) const;
 
-	template<typename KeyType>
+	template <typename KeyType>
 	iterator find(KeyType&& key);
-	template<typename KeyType>
+	template <typename KeyType>
 	const_iterator find(KeyType&& key) const;
 
 	///< flatten
@@ -209,7 +218,7 @@ public:
 	///< emplace & emplace_back
 	template <class... Args>
 	std::pair<iterator, bool> emplace(Args&&... args);
-	
+
 	template <class... Args>
 	jsonRef emplace_back(Args&&... args);
 
@@ -226,11 +235,11 @@ public:
 
 	iterator insert(const_iterator pos, size_t cnt, const json& val);
 
-	iterator insert(const_iterator pos, const_iterator first,
-	                const_iterator last);
+	iterator
+	insert(const_iterator pos, const_iterator first, const_iterator last);
 
 	iterator insert(const_iterator pos, initializer_list_t ilist);
-	
+
 	void insert(const_iterator first, const_iterator last);
 
 	///< earse
@@ -248,7 +257,8 @@ public:
 
 	///< update
 	void update(jsonConstRef j, bool mergeObjects = false);
-	void update(const_iterator first, const_iterator last,
+	void update(const_iterator first,
+	            const_iterator last,
 	            bool mergeObjects = false);
 
 	///< get
@@ -279,13 +289,13 @@ public:
 	bool contains(const object_key_t& key) const;
 	bool contains(jsonConstPtr& ptr) const;
 
-	template<typename KeyType>
+	template <typename KeyType>
 	bool contains(KeyType&& key) const;
 
 	///< count
 	size_t count(const object_key_t& key) const;
 
-	template<typename KeyType>
+	template <typename KeyType>
 	size_t count(KeyType&& key) const;
 
 	///< size
