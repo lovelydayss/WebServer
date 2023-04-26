@@ -70,4 +70,6 @@ a simple webserver program for C++ backend and Audio ...
 
 **2023-4-18** 更新，完成 mJson 库的接口定义（未考虑各部分间关系，暂时设计为单个 Json 类，部分成员函数使用模板方法实现），此外添加 mLog 库至待完成计划。 [git-commit](https://github.com/lovelydayss/WebServer/commit/fd1e8367d45cf74833cdd104cb8b9e7cbbe8b640)
 
+**2023-4-26** 更新，小摆了段时间。在此期间读完了 fmtlog 库的源代码，熟悉掌握了部分模板方面的操作，见识了量化大佬 [MengRao](https://github.com/MengRao) 在提升程序性能，减少时延方面的一系列操作，跟着写了一下高性能时钟获取，无锁队列等。在见识过大佬的优秀作品后，我决定收缩目标范围，暂且放弃 mLog 库开发，之后的日志先采用大佬的 fmtlog 库。接下来将用一星期左右写完 modern C++ 风格的 Json 库 mJson，在完成这个项目后将堆线程池进行重构，进一步尝试优化，实现 headonly。 [git-commit](https://github.com/lovelydayss/WebServer/commit/9aaa8b3a79c50a76d7709479e1d0b7ff6140b40e)
+
 &nbsp;
