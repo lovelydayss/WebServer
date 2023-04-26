@@ -1,8 +1,8 @@
-#include <iostream>
-#include <ostream>
+#define FMTLOG_HEADER_ONLY
+#define _ENABLE_LIKELY_
 #include <iostream>
 
 int main() {
-	std::cout << "hello world!" << std::endl;
+
 	return 0;
-};
+}	

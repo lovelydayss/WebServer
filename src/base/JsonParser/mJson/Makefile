@@ -7,7 +7,7 @@ nlohmann=test_nlohmann.o
 mJson=test_mJson.o mJson.o
 
 # 使用 CFLAGS 控制 Makefile 自动推导标志
-CPPFLAGS=-g -std=c++11
+CPPFLAGS=-g -std=c++17
 CC=g++
 
 test_mJson : $(mJson)

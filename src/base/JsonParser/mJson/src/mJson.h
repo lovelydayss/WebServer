@@ -1,16 +1,46 @@
+#include <cassert>
 #include <cstddef>
 #include <cstdint> // for std::int64_t and std::uint64_t
+#include <cstdio>
+#include <exception>
 #include <initializer_list>
 #include <iterator>
 #include <map>
 #include <memory> // for std::allocator
+#include <mutex>
 #include <string>
 #include <tuple>
 #include <type_traits> // for SFINAE (Substitution Failure Is Not An Error)
 #include <vector>
 
+namespace basic {
+
+// 兼容 std::enable_if_t 的语法
+template <bool B, typename T = void>
+using enable_if_t = typename std::enable_if<B, T>::type;
+
+// 兼容 std::make_unique 的语法
+template <typename T, typename... Args>
+typename std::unique_ptr<T> make_unique(Args&&... args) {
+	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+// 分支预测优化
+#ifdef _ENABLE_LIKELY_
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+#else
+#define likely
+#define unlikely
+#endif
+
+} // namespace basic
+
 namespace mJson {
 
+using namespace basic;
+
+// no binary/discarded
 enum class value_type : std::uint8_t {
 	NULL_TYPE = 1,   ///< null value
 	OBJECT,          ///< object (unordered set of name/value pairs)
@@ -20,8 +50,8 @@ enum class value_type : std::uint8_t {
 	NUMBER_INTEGER,  ///< number value (signed integer)
 	NUMBER_UNSIGNED, ///< number value (unsigned integer)
 	NUMBER_FLOAT,    ///< number value (floating-point)
-	// BINARY,     	 ///< binary array (ordered collection of bytes)
-	// DISCARDED     ///< discarded by the parser callback function
+	BINARY,          ///< binary array (ordered collection of bytes)
+	DISCARDED        ///< discarded by the parser callback function
 };
 
 static std::vector<std::string> valueTypeString = {
@@ -90,8 +120,8 @@ using jsonRef = json&;
 using jsonConstRef = const json&;
 
 ///< iterator
-class iterator;
-class const_iterator;
+//class iterator;
+//class const_iterator;
 
 // class reverse_iterator;
 // class const_reverse_iterator;
@@ -119,6 +149,30 @@ using initializer_list_t = std::initializer_list<json>;
 class json {
 
 public:
+	class const_iterator {
+	public:
+		friend class MyVector;
+		const_iterator(json* ptr = nullptr)
+		    : ptr_(ptr) {}
+		void operator++() { ++ptr_; }
+		bool operator!=(const const_iterator& it) { return ptr_ != it.ptr_; }
+		// 返回值被const修饰，只能读，不能修改
+		const json& operator*() const { return *ptr_; }
+		const json* operator->() const { return ptr_; }
+
+	protected:
+		json* ptr_;
+	};
+
+	class iterator : const_iterator {
+	public:
+		iterator(json* ptr = nullptr)
+		    : const_iterator(ptr) {}
+		// 返回类型是T&的普通引用，可读可写
+		json& operator*() { return *const_iterator::ptr_; }
+		json* operator->() { return const_iterator::ptr_; }
+	};
+
 	///< Constructor
 	json(const value_t v);
 	json(std::nullptr_t = nullptr);
@@ -280,49 +334,125 @@ public:
 	///< items
 
 	///< empty
-	bool empty() const noexcept;
+	bool empty() const noexcept {
+
+		assert(is_primitive() || is_structured());
+
+		if (unlikely(is_null()))
+			return true;
+		else if (is_primitive())
+			return false;
+		else
+			return is_array() ? array_.empty() : map_.empty();
+	}
 
 	///< clear
-	void clear() noexcept;
+	void clear() noexcept {
+
+		assert(is_primitive() || is_structured());
+
+		if (unlikely(is_null()))
+			return;
+
+		switch (type_) {
+		case value_type::BOOLEAN: boolean_ = false; return;
+		case value_type::NUMBER_FLOAT: double_ = 0.0; return;
+		case value_type::NUMBER_INTEGER: integer_ = 0; return;
+		case value_type::NUMBER_UNSIGNED: uinteger_ = 0; return;
+		case value_type::STRING: str_ = ""; return;
+		case value_type::BINARY: return;
+		case value_type::ARRAY: array_.clear(); return;
+		case value_type::OBJECT: map_.clear(); return;
+		default: return;
+		}
+	}
 
 	///< contains
-	bool contains(const object_key_t& key) const;
-	bool contains(jsonConstPtr& ptr) const;
+	bool contains(const object_key_t& key) const { return count(key) != 0; }
 
-	template <typename KeyType>
-	bool contains(KeyType&& key) const;
+	// bool contains(jsonConstPtr& ptr) const;
+
+	// template <typename KeyType>
+	// bool contains(KeyType&& key) const;
 
 	///< count
-	size_t count(const object_key_t& key) const;
+	///< there don't allow element duplication
+	///< just 0-1
+	size_t count(const object_key_t& key) const {
+		assert(is_object());
+		return map_.find(key) != map_.end() ? 1 : 0;
+	}
 
-	template <typename KeyType>
-	size_t count(KeyType&& key) const;
+	// template <typename KeyType>
+	// size_t count(KeyType&& key) const;
 
 	///< size
-	size_t size() const noexcept;
+	size_t size() const noexcept {
+
+		if (unlikely(is_null()))
+			return 0;
+		else if (is_primitive())
+			return 1;
+		else
+			return is_array() ? array_.size() : map_.size();
+	}
 
 	///< type
-	value_t type() const;       ///< return the type of the JSON value
-	string_t type_name() const; ///< return the type as string
+	constexpr value_t type() const noexcept { return type_; }
+	string_t type_name() const { return errorTypeString[(size_t)type_]; }
 
 	///< is.....
-	constexpr bool is_primitive() const noexcept;
-	constexpr bool is_structured() const noexcept;
-	constexpr bool is_null() const noexcept;
-	constexpr bool is_object() const noexcept;
-	constexpr bool is_array() const noexcept;
-	constexpr bool is_string() const noexcept;
-	constexpr bool is_boolean() const noexcept;
-	constexpr bool is_number() const noexcept;
-	constexpr bool is_number_float() const noexcept;
-	constexpr bool is_number_integer() const noexcept;
-	constexpr bool is_number_unsigned() const noexcept;
-
-	// constexpr bool is_binary() const noexcept;
-	// constexpr bool is_discarded() const noexcept;
+	constexpr bool is_primitive() const noexcept {
+		return is_string() || is_number() || is_boolean() || is_null() ||
+		       is_binary();
+	}
+	constexpr bool is_structured() const noexcept {
+		return is_array() || is_object();
+	}
+	constexpr bool is_null() const noexcept {
+		return type_ == value_type::NULL_TYPE;
+	}
+	constexpr bool is_object() const noexcept {
+		return type_ == value_type::OBJECT;
+	}
+	constexpr bool is_array() const noexcept {
+		return type_ == value_type::ARRAY;
+	}
+	constexpr bool is_string() const noexcept {
+		return type_ == value_type::STRING;
+	}
+	constexpr bool is_boolean() const noexcept {
+		return type_ == value_type::BOOLEAN;
+	}
+	constexpr bool is_number() const noexcept {
+		return is_number_float() || is_number_integer() || is_number_unsigned();
+	}
+	constexpr bool is_number_float() const noexcept {
+		return type_ == value_type::NUMBER_FLOAT;
+	}
+	constexpr bool is_number_integer() const noexcept {
+		return type_ == value_type::NUMBER_INTEGER;
+	}
+	constexpr bool is_number_unsigned() const noexcept {
+		return type_ == value_type::NUMBER_UNSIGNED;
+	}
+	constexpr bool is_binary() const noexcept {
+		return type_ == value_type::BINARY;
+	}
+	constexpr bool is_discarded() const noexcept {
+		return type_ == value_type::DISCARDED;
+	}
 
 	///< max_size
-	size_t max_size() const noexcept;
+	size_t max_size() const noexcept {
+
+		if (unlikely(is_null()))
+			return 0;
+		else if (is_primitive())
+			return 1;
+		else
+			return is_array() ? array_.max_size() : map_.max_size();
+	}
 
 	///< array & object
 	static json array(initializer_list_t init = {});
@@ -374,6 +504,8 @@ private:
 		number_integer_t integer_;   ///< int value
 		number_unsigned_t uinteger_; ///< unsigned int value
 		number_float_t double_;      ///< float value
+
+		boolean_t boolean_;
 	};
 };
 
