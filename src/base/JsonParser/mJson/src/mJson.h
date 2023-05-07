@@ -113,6 +113,7 @@ static std::vector<std::string> errorTypeString = {
     "OBJECT_INDEX_WRONG",
     "LEPT_KEY_NOT_EXIST"};
 
+
 class json;
 using jsonPtr = std::unique_ptr<json>;
 using jsonConstPtr = const std::unique_ptr<json>;
@@ -151,7 +152,7 @@ class json {
 public:
 	class const_iterator {
 	public:
-		friend class MyVector;
+		friend class json;
 		const_iterator(json* ptr = nullptr)
 		    : ptr_(ptr) {}
 		void operator++() { ++ptr_; }
@@ -174,8 +175,8 @@ public:
 	};
 
 	///< Constructor
-	json(const value_t v);
-	json(std::nullptr_t = nullptr);
+	json(const value_t v) : type_(v) {}
+	json(std::nullptr_t = nullptr) : type_(value_type::NULL_TYPE) {}
 
 	template <typename JsonValueType>
 	json(const JsonValueType& val);
@@ -199,6 +200,26 @@ public:
 
 	///< Destructor
 	~json() noexcept;
+
+	///< init
+	void init() {
+		assert(is_primitive() || is_structured());
+
+		if (unlikely(is_null()))
+			return;
+
+		switch (type_) {
+		case value_type::BOOLEAN: boolean_ = false; return;
+		case value_type::NUMBER_FLOAT: double_ = 0.0; return;
+		case value_type::NUMBER_INTEGER: integer_ = 0; return;
+		case value_type::NUMBER_UNSIGNED: uinteger_ = 0; return;
+		case value_type::STRING: str_ = ""; return;
+		case value_type::BINARY: return;
+		case value_type::ARRAY: array_.clear(); return;
+		case value_type::OBJECT: map_.clear(); return;
+		default: return;
+		}
+	}
 
 	///< swap
 	void swap(jsonRef other) noexcept;
@@ -455,8 +476,12 @@ public:
 	}
 
 	///< array & object
-	static json array(initializer_list_t init = {});
-	static json object(initializer_list_t init = {});
+	static json array(initializer_list_t init = {}) {
+		return new json(init,true,value_type::ARRAY);
+	}
+	static json object(initializer_list_t init = {}) {
+		return new json(init,true,value_t::OBJECT);
+	}
 
 	///< operator []
 	jsonRef operator[](size_t idx);

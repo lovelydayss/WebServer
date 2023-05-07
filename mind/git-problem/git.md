@@ -94,3 +94,31 @@ git rm -r --cached (file/dir name)
 ```bash
 git push -f origin master
 ```
+
+### 问题信息
+
+```
+remote: Support for password authentication was removed on August 13, 2021.
+remote: Please see https://docs.github.com/en/get-started、getting-started-with-git/about-remote-repositories#cloning-with-https-urls for information on currently recommended modes of authentication.
+```
+
+### 解决方法
+
+此问题是因为自从 21 年 8 月 13 后不再支持用户名密码的方式验证了，需要创建个人访问令牌(personal access token)。可在 GitHub 上生成令牌，应用于所需的仓库中
+
+```
+1.点击 settings
+2.点击右侧的 Developer settings
+3.点击 Personal access tokens(个人访问令牌)
+4.点击 Generate new token
+5.设置 token 信息
+6.根据所需过期时间，建议设置成永远，以免麻烦，建议所有选项都选上
+7.点击 Generate token 生成令牌
+8.得到生成的令牌
+9.应用令牌
+10.修改现有的 url
+git remote set-url origin  https://<your_token>@github.com/<USERNAME>/<REPO>.git
+将<your_token>换成你自己得到的令牌。<USERNAME>是你自己github的用户名，<REPO>是你的项目名称
+换成你自己得到的令牌。是你自己github的用户名，`是你的项目名称
+11.再次执行 pull push 操作
+```
